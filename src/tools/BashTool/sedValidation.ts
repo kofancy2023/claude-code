@@ -6,9 +6,12 @@ import type { PermissionResult } from '../../utils/permissions/PermissionResult.
 /**
  * Helper: Validate flags against an allowlist
  * Handles both single flags and combined flags (e.g., -nE)
- * @param flags Array of flags to validate
- * @param allowedFlags Array of allowed single-character and long flags
- * @returns true if all flags are valid, false otherwise
+ * 辅助函数：根据白名单验证标志
+ * 处理单个标志和组合标志（例如 -nE）
+ *
+ * @param flags Array of flags to validate / 要验证的标志数组
+ * @param allowedFlags Array of allowed single-character and long flags / 允许的单字符和长标志数组
+ * @returns true if all flags are valid, false otherwise / 如果所有标志有效则返回 true，否则返回 false
  */
 function validateFlagsAgainstAllowlist(
   flags: string[],
@@ -36,10 +39,14 @@ function validateFlagsAgainstAllowlist(
 
 /**
  * Pattern 1: Check if this is a line printing command with -n flag
+ * 模式1：检查这是否带有 -n 标志的行打印命令
  * Allows: sed -n 'N' | sed -n 'N,M' with optional -E, -r, -z flags
+ * 允许： sed -n 'N' | sed -n 'N,M'（带有可选的 -E、-r、-z 标志）
  * Allows semicolon-separated print commands like: sed -n '1p;2p;3p'
+ * 允许分号分隔的打印命令，例如: sed -n '1p;2p;3p'
  * File arguments are ALLOWED for this pattern
- * @internal Exported for testing
+ * 文件参数在此模式下是允许的
+ * @internal Exported for testing / 导出用于测试
  */
 export function isLinePrintingCommand(
   command: string,
@@ -118,12 +125,15 @@ export function isLinePrintingCommand(
 
 /**
  * Helper: Check if a single command is a valid print command
+ * 辅助函数：检查单个命令是否为有效的打印命令
  * STRICT ALLOWLIST - only these exact forms are allowed:
- * - p (print all)
- * - Np (print line N, where N is digits)
- * - N,Mp (print lines N through M)
+ * 严格白名单 - 仅允许以下精确格式：
+ * - p (print all / 打印所有行)
+ * - Np (print line N, where N is digits / 打印第 N 行，其中 N 为数字)
+ * - N,Mp (print lines N through M / 打印第 N 到 M 行)
  * Anything else (including w, W, e, E commands) is rejected.
- * @internal Exported for testing
+ * 其他任何内容（包括 w、W、e/E 叽令）将被拒绝。
+ * @internal Exported for testing / 导出用于测试
  */
 export function isPrintCommand(cmd: string): boolean {
   if (!cmd) return false
@@ -134,10 +144,14 @@ export function isPrintCommand(cmd: string): boolean {
 
 /**
  * Pattern 2: Check if this is a substitution command
+ * 模式2：检查这是否为替换命令
  * Allows: sed 's/pattern/replacement/flags' where flags are only: g, p, i, I, m, M, 1-9
- * When allowFileWrites is true, allows -i flag and file arguments for in-place editing
+ * 允许： sed 's/pattern/replacement/flags'，其中标志仅限： g, p, i, I, m, M, 1-9
+ * When allowFileWrites is true. allows -i flag and file arguments for in-place editing
+ * 当 allowFileWrites 为 true 时，允许 -i 标志和文件参数用于就地编辑
  * When allowFileWrites is false (default), requires stdout-only (no file arguments, no -i flag)
- * @internal Exported for testing
+ * 当 allowFileWrites 为 false（默认）时，要求仅标准输出（无文件参数，无 -i 标志）
+ * @internal Exported for testing / 导出用于测试
  */
 function isSubstitutionCommand(
   command: string,
@@ -630,16 +644,20 @@ function containsDangerousOperations(expression: string): boolean {
 
 /**
  * Cross-cutting validation step for sed commands.
+ * sed 命令的交叉验证步骤。
  *
  * This is a constraint check that blocks dangerous sed operations regardless of mode.
+ * 这是一个约束检查，无论模式如何都会阻止危险的 sed 操作。
  * It returns 'passthrough' for non-sed commands or safe sed commands,
+ * 对非 sed 命令或安全的 sed 庽令返回 'passthrough'，
  * and 'ask' for dangerous sed operations (w/W/e/E commands).
+ * 对危险的 sed 操作（w/W/e/E 命令）返回 'ask'。
  *
- * @param input - Object containing the command string
- * @param toolPermissionContext - Context containing mode and permissions
+ * @param input - Object containing the command string / 包含命令字符串的对象
+ * @param toolPermissionContext - Context containing mode and permissions / 包含模式和权限的上下文
  * @returns
- * - 'ask' if any sed command contains dangerous operations
- * - 'passthrough' if no sed commands or all are safe
+ * - 'ask' if any sed command contains dangerous operations / 如果任何 sed 庽令包含危险操作
+ * - 'passthrough' if no sed commands / all are safe / 如果没有 sed 命令或全部安全
  */
 export function checkSedConstraints(
   input: { command: string },

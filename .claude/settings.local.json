@@ -1,0 +1,24 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(grep -rl '// ' D:/mySource/cusor-proj/claude-code/src --include=*.ts --include=*.tsx)",
+      "Bash(grep -rl /* D:/mySource/cusor-proj/claude-code/src --include=*.ts --include=*.tsx)",
+      "mcp__web-reader__webReader",
+      "WebSearch",
+      "Bash(git clone:*)",
+      "Bash(cp:*)",
+      "Read(//d/mySource/cusor-proj/claude-code/$HOME/.claude/skills/**)",
+      "Read(//d/mySource/cusor-proj/claude-code/$HOME/.claude/skills/ui-ux-pro-max/**)",
+      "Bash(bun --version)",
+      "Bash(bun install:*)",
+      "Bash(bun upgrade:*)",
+      "Bash(wc -l D:/mySource/cusor-proj/claude-code/src/**/*.ts D:/mySource/cusor-proj/claude-code/src/**/*.tsx)",
+      "Bash(xxd)",
+      "Bash(bun -e \":*)",
+      "Bash(npm install:*)",
+      "Bash(zread --help)",
+      "Bash(zread generate:*)",
+      "Bash(tee my_analysis/output.md)"
+    ]
+  }
+}

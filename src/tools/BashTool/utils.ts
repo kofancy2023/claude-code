@@ -18,6 +18,9 @@ import { countCharInString, plural } from '../../utils/stringUtils.js'
  * Strips leading and trailing lines that contain only whitespace/newlines.
  * Unlike trim(), this preserves whitespace within content lines and only removes
  * completely empty lines from the beginning and end.
+ *
+ * 去除仅包含空白字符/换行符的首尾行。
+ * 与 trim() 不同，此函数保留内容行内的空白，仅移除开头和结尾的完全空行。
  */
 export function stripEmptyLines(content: string): string {
   const lines = content.split('\n')

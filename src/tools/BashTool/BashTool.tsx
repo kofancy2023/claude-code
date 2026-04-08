@@ -52,8 +52,11 @@ import { buildImageToolResult, isImageOutput, resetCwdIfOutsideProject, resizeSh
 const EOL = '\n';
 
 // Progress display constants
+// 进度显示常量
 const PROGRESS_THRESHOLD_MS = 2000; // Show progress after 2 seconds
+// 2秒后显示进度
 // In assistant mode, blocking bash auto-backgrounds after this many ms in the main agent
+// 在助手模式下，阻塞式bash在主代理中超过此毫秒数后自动转为后台运行
 const ASSISTANT_BLOCKING_BUDGET_MS = 15_000;
 
 // Search commands for collapsible display (grep, find, etc.)

@@ -18,8 +18,11 @@ type SandboxInput = {
 // NOTE: excludedCommands is a user-facing convenience feature, not a security boundary.
 // It is not a security bug to be able to bypass excludedCommands — the sandbox permission
 // system (which prompts users) is the actual security control.
+// 注意：excludedCommands 是面向用户的便利功能，不是安全边界。
+// 能够绕过 excludedCommands 并不是安全漏洞 —— 沙箱权限系统（提示用户）才是真正的安全控制。
 function containsExcludedCommand(command: string): boolean {
   // Check dynamic config for disabled commands and substrings (only for ants)
+  // 检查动态配置中被禁用的命令和子串（仅限于 ant 用户）
   if (process.env.USER_TYPE === 'ant') {
     const disabledCommands = getFeatureValue_CACHED_MAY_BE_STALE<{
       commands: string[]
@@ -27,12 +30,12 @@ function containsExcludedCommand(command: string): boolean {
     }>('tengu_sandbox_disabled_commands', { commands: [], substrings: [] })
 
     // Check if command contains any disabled substrings
+    // 检查命令是否包含任何被禁用的子串
     for (const substring of disabledCommands.substrings) {
       if (command.includes(substring)) {
         return true
       }
     }
-
     // Check if command starts with any disabled commands
     try {
       const commandParts = splitCommand_DEPRECATED(command)
@@ -50,6 +53,7 @@ function containsExcludedCommand(command: string): boolean {
   }
 
   // Check user-configured excluded commands from settings
+  // 检查用户在设置中配置的排除命令
   const settings = getSettings_DEPRECATED()
   const userExcludedCommands = settings.sandbox?.excludedCommands ?? []
 

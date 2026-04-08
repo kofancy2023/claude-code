@@ -1,12 +1,16 @@
 /**
  * Parser for sed edit commands (-i flag substitutions)
  * Extracts file paths and substitution patterns to enable file-edit-style rendering
+ *
+ * sed 编辑命令解析器（-i 标志替换）
+ * 提取文件路径和替换模式，以启用文件编辑风格的渲染
  */
 
 import { randomBytes } from 'crypto'
 import { tryParseShellCommand } from '../../utils/bash/shellQuote.js'
 
 // BRE→ERE conversion placeholders (null-byte sentinels, never appear in user input)
+// BRE→ERE 转换占位符（空字节哨兵，永远不会出现在用户输入中）
 const BACKSLASH_PLACEHOLDER = '\x00BACKSLASH\x00'
 const PLUS_PLACEHOLDER = '\x00PLUS\x00'
 const QUESTION_PLACEHOLDER = '\x00QUESTION\x00'
@@ -21,21 +25,25 @@ const LPAREN_PLACEHOLDER_RE = new RegExp(LPAREN_PLACEHOLDER, 'g')
 const RPAREN_PLACEHOLDER_RE = new RegExp(RPAREN_PLACEHOLDER, 'g')
 
 export type SedEditInfo = {
-  /** The file path being edited */
+  /** The file path being edited / 被编辑的文件路径 */
   filePath: string
-  /** The search pattern (regex) */
+  /** The search pattern (regex) / 搜索模式（正则表达式） */
   pattern: string
-  /** The replacement string */
+  /** The replacement string / 替换字符串 */
   replacement: string
-  /** Substitution flags (g, i, etc.) */
+  /** Substitution flags (g, i, etc.) / 替换标志（g、i 等） */
   flags: string
-  /** Whether to use extended regex (-E or -r flag) */
+  /** Whether to use extended regex (-E or -r flag) / 是否使用扩展正则表达式（-E 或 -r 标志） */
   extendedRegex: boolean
 }
 
 /**
  * Check if a command is a sed in-place edit command
+ * 检查命令是否为 sed 就位编辑命令（仅支持简单的 -i 's/.../file' 格式）
  * Returns true only for simple sed -i 's/pattern/replacement/flags' file commands
+ *
+ * 检查命令是否为 sed 就地编辑命令
+ * 仅对简单的 sed -i 's/pattern/replacement/flags' file 命令返回 true
  */
 export function isSedInPlaceEdit(command: string): boolean {
   const info = parseSedEditCommand(command)
@@ -44,12 +52,14 @@ export function isSedInPlaceEdit(command: string): boolean {
 
 /**
  * Parse a sed edit command and extract the edit information
+ * 解析 sed 编辑命令并提取编辑信息
  * Returns null if the command is not a valid sed in-place edit
+ * 如果命令不是有效的 sed 就位编辑命令则返回 null
  */
 export function parseSedEditCommand(command: string): SedEditInfo | null {
   const trimmed = command.trim()
 
-  // Must start with sed
+  // Must start with sed / 必须以 sed 开头
   const sedMatch = trimmed.match(/^\s*sed\s+/)
   if (!sedMatch) return null
 
@@ -58,7 +68,7 @@ export function parseSedEditCommand(command: string): SedEditInfo | null {
   if (!parseResult.success) return null
   const tokens = parseResult.tokens
 
-  // Extract string tokens only
+  // Extract string tokens only / 仅提取字符串令牌
   const args: string[] = []
   for (const token of tokens) {
     if (typeof token === 'string') {
@@ -74,7 +84,7 @@ export function parseSedEditCommand(command: string): SedEditInfo | null {
     }
   }
 
-  // Parse flags and arguments
+  // Parse flags and arguments / 解析标志和参数
   let hasInPlaceFlag = false
   let extendedRegex = false
   let expression: string | null = null
@@ -84,7 +94,7 @@ export function parseSedEditCommand(command: string): SedEditInfo | null {
   while (i < args.length) {
     const arg = args[i]!
 
-    // Handle -i flag (with or without backup suffix)
+    // Handle -i flag (with or without backup suffix) / 处理 -i 标志（带或不带备份后缀）
     if (arg === '-i' || arg === '--in-place') {
       hasInPlaceFlag = true
       i++
@@ -158,6 +168,7 @@ export function parseSedEditCommand(command: string): SedEditInfo | null {
   }
 
   // Must have -i flag, expression, and file path
+  // 必须包含 -i 标志、表达式和文件路径
   if (!hasInPlaceFlag || !expression || !filePath) {
     return null
   }

@@ -3,6 +3,11 @@
  *
  * Many commands use exit codes to convey information other than just success/failure.
  * For example, grep returns 1 when no matches are found, which is not an error condition.
+ *
+ * 命令语义配置，用于在不同上下文中解释退出码。
+ *
+ * 许多命令使用退出码来传达除成功/失败之外的信息。
+ * 例如，grep在未找到匹配时返回1，这并不是错误条件。
  */
 
 import { splitCommand_DEPRECATED } from '../../utils/bash/commands.js'
@@ -18,6 +23,7 @@ export type CommandSemantic = (
 
 /**
  * Default semantic: treat only 0 as success, everything else as error
+ * 默认语义：仅将 0 视为成功，其他均视为错误
  */
 const DEFAULT_SEMANTIC: CommandSemantic = (exitCode, _stdout, _stderr) => ({
   isError: exitCode !== 0,
@@ -90,6 +96,7 @@ const COMMAND_SEMANTICS: Map<string, CommandSemantic> = new Map([
 
 /**
  * Get the semantic interpretation for a command
+ * 获取命令的语义解释
  */
 function getCommandSemantic(command: string): CommandSemantic {
   // Extract the base command (first word, handling pipes)

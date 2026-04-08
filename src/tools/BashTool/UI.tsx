@@ -23,11 +23,14 @@ import { extractBashCommentLabel } from './commentLabel.js';
 import { parseSedEditCommand } from './sedEditParser.js';
 
 // Constants for command display
+// 命令显示常量
 const MAX_COMMAND_DISPLAY_LINES = 2;
 const MAX_COMMAND_DISPLAY_CHARS = 160;
 
 // Simple component to show background hint and handle ctrl+b
 // When ctrl+b is pressed, backgrounds ALL running foreground commands
+// 显示后台提示并处理 ctrl+b 的简单组件
+// 按下 ctrl+b 时，将所有运行中的前台命令转为后台运行
 export function BackgroundHint(t0) {
   const $ = _c(9);
   let t1;
@@ -97,6 +100,7 @@ export function renderToolUseMessage(input: Partial<BashToolInput>, {
   }
 
   // Render sed in-place edits like file edits (show file path only)
+  // 将 sed 就地编辑渲染为文件编辑（仅显示文件路径）
   const sedInfo = parseSedEditCommand(command);
   if (sedInfo) {
     return verbose ? sedInfo.filePath : getDisplayPath(sedInfo.filePath);
