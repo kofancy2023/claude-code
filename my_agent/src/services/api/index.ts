@@ -1,28 +1,18 @@
 import type { AIProvider, ProviderConfig } from './types.js';
-import { AnthropicClient } from './AnthropicClient.js';
-import { GLMClient } from './GLMClient.js';
+import { createProvider } from './provider-factory.js';
 
-export function createProvider(config: ProviderConfig): AIProvider {
-  switch (config.provider) {
-    case 'anthropic':
-      return new AnthropicClient({
-        apiKey: config.apiKey,
-        model: config.model,
-      });
-
-    case 'glm':
-      return new GLMClient({
-        apiKey: config.apiKey,
-        model: config.model,
-        baseUrl: config.baseUrl,
-      });
-
-    default:
-      throw new Error(`Unknown provider: ${config.provider}`);
-  }
+export function createAIProvider(config: ProviderConfig): AIProvider {
+  return createProvider(config);
 }
 
+export { createProvider } from './provider-factory.js';
+
 export { AnthropicClient } from './AnthropicClient.js';
-export { GLMClient } from './GLMClient.js';
-export type { AIProvider, ProviderConfig, ToolCall } from './types.js';
-export type { Provider } from './types.js';
+export { OpenAICompatClient } from './OpenAICompatClient.js';
+export { GeminiClient } from './GeminiClient.js';
+export { ResilientClient } from './ResilientClient.js';
+
+export type { AIProvider, ToolCall } from './types.js';
+export type { ProviderConfig as AIProviderConfig } from './types.js';
+export type { ProviderName, ModelInfo } from './provider-config.js';
+export { PROVIDER_ENDPOINTS, KNOWN_MODELS } from './provider-config.js';

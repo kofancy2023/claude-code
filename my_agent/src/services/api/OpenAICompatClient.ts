@@ -2,26 +2,17 @@ import type { Message, Tool } from '../../types/index.js';
 import type { AIProvider, ToolCall, StreamCallbacks } from './types.js';
 
 /**
- * 工具调用增量数据
- * 用于解析流式响应中的工具调用片段
- */
-interface ToolCallDelta {
-  id?: string;
-  name?: string;
-  arguments?: string;
-}
-
-/**
- * 智谱 GLM AI 客户端
+ * OpenAI 兼容 API 客户端
  *
- * 实现与智谱 GLM API 的交互，支持：
- * - 流式输出响应
- * - 工具调用
- * - 内置网络搜索
+ * 用于支持任何兼容 OpenAI ChatCompletions API 的服务：
+ * - OpenAI 官方 API
+ * - Azure OpenAI
+ * - 本地模型（如 LM Studio、Ollama）
+ * - 其他兼容 API（如 Groq、Perplexity 等）
  */
-export class GLMClient implements AIProvider {
+export class OpenAICompatClient implements AIProvider {
   /** 提供商名称 */
-  name = 'GLM';
+  name: string;
 
   /** API 密钥 */
   private apiKey: string;
@@ -35,21 +26,25 @@ export class GLMClient implements AIProvider {
   /**
    * 构造函数
    *
-   * @param apiKey - GLM API 密钥
-   * @param baseUrl - API 基础 URL，默认为智谱官方地址
-   * @param model - 模型名称，默认为 glm-5.1
+   * @param name - 提供商名称（用于显示）
+   * @param apiKey - API 密钥
+   * @param baseUrl - API 基础 URL
+   * @param model - 模型名称
    */
   constructor({
+    name,
     apiKey,
-    baseUrl = 'https://open.bigmodel.cn/api/paas/v4',
-    model = 'glm-5.1',
+    baseUrl,
+    model,
   }: {
+    name: string;
     apiKey: string;
-    baseUrl?: string;
-    model?: string;
+    baseUrl: string;
+    model: string;
   }) {
+    this.name = name;
     this.apiKey = apiKey;
-    this.baseUrl = baseUrl;
+    this.baseUrl = baseUrl.replace(/\/$/, '');  // 移除末尾斜杠
     this.model = model;
   }
 
@@ -67,30 +62,12 @@ export class GLMClient implements AIProvider {
   ): Promise<{ text: string; toolCalls: ToolCall[] }> {
     const url = `${this.baseUrl}/chat/completions`;
 
-    // 构建系统提示，包含日期和工具使用指导
-    const now = new Date();
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    const dateStr = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
-    const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
-    const systemMessage = {
-      role: 'system',
-      content: [
-        `当前时间：${dateStr} ${timeStr}（${tz}）。`,
-        '',
-        '你拥有实时联网能力，可以获取最新信息。当用户询问新闻、时事、最新动态等需要时效性信息的问题时，请基于你获取到的最新信息直接回答，不要声称自己无法联网。',
-        '',
-        '## 工具使用规则',
-        '- BashTool: 仅用于本地命令行操作（如 ls、git、npm 等），禁止用于网络请求',
-        '- FileReadTool/FileWriteTool/EditTool: 仅用于本地文件操作',
-        '- GitHub*Tools: 仅在用户明确要求查询 GitHub 仓库/Issue/PR 时使用',
-        '- 禁止使用 BashTool 执行 curl/wget 等网络请求',
-        '- 禁止调用与用户问题无关的工具',
-      ].join('\n'),
-    };
+    // 构建系统提示
+    const systemPromptWithDate = this.buildSystemPrompt();
 
     // 准备请求消息
     const requestMessages = [
-      systemMessage,
+      { role: 'system' as const, content: systemPromptWithDate },
       ...messages.map((msg) => ({
         role: msg.role,
         content: typeof msg.content === 'string' ? msg.content : this.contentToString(msg.content),
@@ -101,16 +78,11 @@ export class GLMClient implements AIProvider {
     const requestBody: Record<string, unknown> = {
       model: this.model,
       messages: requestMessages,
-      stream: true,
+      stream: true,  // 启用流式输出
     };
 
-    // GLM API 限制：web_search 和 function tools 互斥
-    // 当存在 function tools 时，web_search 会被静默忽略
-    // 策略：根据查询意图只发送适当的工具类型
-    const needsFunctionTools = this.queryNeedsFunctionTools(messages);
-
-    if (needsFunctionTools) {
-      // 只发送函数工具（web_search 反正也不会生效）
+    // 如果有工具，添加工具列表
+    if (tools.length > 0) {
       requestBody.tools = tools.map((tool) => ({
         type: 'function',
         function: {
@@ -119,15 +91,6 @@ export class GLMClient implements AIProvider {
           parameters: tool.inputSchema,
         },
       }));
-    } else {
-      // 只发送网络搜索（用于知识/新闻/当前信息查询）
-      requestBody.tools = [{
-        type: 'web_search',
-        web_search: {
-          enable: true,
-          search_result: true,
-        },
-      }];
     }
 
     // 发送请求
@@ -142,7 +105,7 @@ export class GLMClient implements AIProvider {
 
     if (!response.ok) {
       const errorText = await response.text();
-      const error = new Error(`GLM API error: ${response.status} - ${errorText}`);
+      const error = new Error(`${this.name} API error: ${response.status} - ${errorText}`);
       callbacks?.onError?.(error);
       throw error;
     }
@@ -168,7 +131,7 @@ export class GLMClient implements AIProvider {
     let fullText = '';
 
     // 存储正在构建的工具调用
-    const toolCallsMap = new Map<string, ToolCallDelta>();
+    const toolCallsMap = new Map<string, { id: string; name: string; arguments: string }>();
     let currentToolCallId: string | null = null;
 
     try {
@@ -205,34 +168,7 @@ export class GLMClient implements AIProvider {
                   }>;
                 };
               }>;
-              web_search?: Array<{
-                query?: string;
-                search_results?: Array<{
-                  title?: string;
-                  content?: string;
-                  link?: string;
-                  media?: string;
-                  icon?: string;
-                  refer?: string;
-                }>;
-              }>;
             };
-
-            // 显示 GLM 内置网络搜索活动
-            if (chunk.web_search && Array.isArray(chunk.web_search)) {
-              for (const search of chunk.web_search) {
-                if (search.query) {
-                  process.stdout.write(`\n\x1b[36m🔍 Web Search: ${search.query}\x1b[0m\n`);
-                }
-                const results = search.search_results || [];
-                if (results.length > 0) {
-                  for (const r of results.slice(0, 5)) {
-                    const source = r.media ? ` - ${r.media}` : '';
-                    process.stdout.write(`  \x1b[90m• ${r.title || 'Untitled'}${source}\x1b[0m\n`);
-                  }
-                }
-              }
-            }
 
             const delta = chunk.choices[0]?.delta;
 
@@ -242,6 +178,7 @@ export class GLMClient implements AIProvider {
                 const func = toolCallDelta?.function;
                 const id = toolCallDelta?.id;
                 if (id && func?.name && !toolCallsMap.has(id)) {
+                  // 新工具调用开始
                   toolCallsMap.set(id, {
                     id: id,
                     name: func.name || '',
@@ -251,7 +188,7 @@ export class GLMClient implements AIProvider {
                 } else if (currentToolCallId && toolCallsMap.has(currentToolCallId) && func?.arguments) {
                   // 追加参数片段
                   const existing = toolCallsMap.get(currentToolCallId)!;
-                  existing.arguments = (existing.arguments || '') + func.arguments;
+                  existing.arguments += func.arguments;
                 }
               }
             }
@@ -261,7 +198,7 @@ export class GLMClient implements AIProvider {
               fullText += delta.content;
               callbacks?.onChunk?.(delta.content);
             }
-          } catch (e) {
+          } catch {
             // 忽略无法解析的行
           }
         }
@@ -294,34 +231,29 @@ export class GLMClient implements AIProvider {
   }
 
   /**
-   * 检测用户消息是否需要函数工具
+   * 构建系统提示
    *
-   * 如果不需要，则发送网络搜索工具
-   * 这是一种优化策略，避免同时发送两种工具导致冲突
-   *
-   * @param messages - 对话历史
+   * 包含日期时间和工具使用规则
    */
-  private queryNeedsFunctionTools(messages: Message[]): boolean {
-    const lastMsg = messages[messages.length - 1];
-    const content = typeof lastMsg.content === 'string'
-      ? lastMsg.content
-      : JSON.stringify(lastMsg.content);
+  private buildSystemPrompt(): string {
+    const now = new Date();
+    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const dateStr = now.toLocaleDateString('zh-CN', { year: 'numeric', month: 'long', day: 'numeric', weekday: 'long' });
+    const timeStr = now.toLocaleTimeString('zh-CN', { hour: '2-digit', minute: '2-digit' });
 
-    // 强烈暗示需要函数工具的关键词模式
-    const toolPatterns = [
-      /\b(file|files|文件|目录|folder)\b/i,
-      /\b(read|write|edit|读取|写入|编辑|修改|创建|删除)\b/i,
-      /\b(ls|cd|cat|mkdir|rm|cp|mv|chmod)\b/i,
-      /\b(run|execute|执行|运行|启动)\b.*\b(command|cmd|bash|shell|命令|脚本)\b/i,
-      /\b(command|cmd|bash|shell|命令行|终端)\b/i,
-      /\b(git|github)\b/i,
-      /\bnpm\b|\bpip\b|\bbun\b/i,
-      /\.(ts|js|py|json|md|txt|yaml|yml|toml)\b/i,
-      /\bcode\b.*\b(in|inside|under|at)\b/i,
-      /\b(列出|查看|打开|find|search|glob)\b.*\b(文件|目录|file|folder)\b/i,
-    ];
-
-    return toolPatterns.some(p => p.test(content));
+    return [
+      `当前时间：${dateStr} ${timeStr}（${tz}）。注意：现在是2026年，请使用这个日期回答问题。`,
+      '',
+      '你拥有实时联网能力，可以获取最新信息。当用户询问新闻、时事、最新动态等需要时效性信息的问题时，请基于你获取到的最新信息直接回答，不要声称自己无法联网。',
+      '',
+      '## 工具使用规则',
+      '- BashTool: 仅用于本地命令行操作（如 ls、git、npm 等），禁止用于网络请求',
+      '- WebSearchTool: 用于网络搜索，获取最新资讯',
+      '- FileReadTool/FileWriteTool/EditTool: 仅用于本地文件操作',
+      '- GitHub*Tools: 仅在用户明确要求查询 GitHub 仓库/Issue/PR 时使用',
+      '- 禁止使用 BashTool 执行 curl/wget 等网络请求',
+      '- 禁止调用与用户问题无关的工具',
+    ].join('\n');
   }
 
   /**
