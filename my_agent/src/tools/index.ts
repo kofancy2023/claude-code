@@ -1,2 +1,15 @@
 export { BashTool } from './BashTool.js';
+export { FileReadTool } from './FileReadTool.js';
+export { FileWriteTool } from './FileWriteTool.js';
+export { FileListTool } from './FileListTool.js';
+export { GlobTool } from './GlobTool.js';
+export { EditTool } from './EditTool.js';
+export { WebSearchTool } from './WebSearchTool.js';
+export { GitHubRepoTool } from './GitHubRepoTool.js';
+export { GitHubIssueTool } from './GitHubIssueTool.js';
+export { GitHubCodeSearchTool } from './GitHubCodeSearchTool.js';
+export { GitHubPullRequestTool } from './GitHubPullRequestTool.js';
+export { GitHubCommitTool } from './GitHubCommitTool.js';
+export { GitHubBranchTool } from './GitHubBranchTool.js';
+export { GitHubUserTool } from './GitHubUserTool.js';
 export { toolRegistry, ToolRegistry } from './registry.js';
