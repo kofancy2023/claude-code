@@ -1,6 +1,7 @@
 import { writeFileSync, mkdirSync, existsSync } from 'fs';
 import { dirname } from 'path';
 import type { Tool } from '../types/index.js';
+import { inputValidator, secretScanner } from '../utils/security.js';
 
 export const FileWriteTool: Tool = {
   name: 'FileWriteTool',
@@ -25,13 +26,23 @@ export const FileWriteTool: Tool = {
     const path = input.path as string;
     const content = input.content as string;
 
+    const validation = inputValidator.validatePath(path);
+    if (!validation.valid) {
+      return `Error: ${validation.error}`;
+    }
+
+    const secretCheck = secretScanner.scan(content);
+    if (secretCheck.hasSecrets) {
+      console.warn('[Security Warning] File content contains potential secrets:', secretCheck.summary);
+    }
+
     try {
-      const dir = dirname(path);
+      const dir = dirname(validation.sanitized);
       if (!existsSync(dir)) {
         mkdirSync(dir, { recursive: true });
       }
 
-      writeFileSync(path, content, 'utf-8');
+      writeFileSync(validation.sanitized, content, 'utf-8');
       return `Successfully wrote to file: ${path}`;
     } catch (error) {
       if (error instanceof Error) {

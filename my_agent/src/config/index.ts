@@ -27,7 +27,7 @@ export interface ErrorReportingConfig {
 }
 
 export interface ConfigSource {
-  source: 'default' | 'env' | 'file' | 'cli';
+  source: 'default' | 'env' | 'file' | 'cli' | 'memory';
   value: unknown;
 }
 
@@ -158,6 +158,11 @@ export class Config {
   private set(key: keyof AppConfig, value: unknown, source: ConfigSource['source']): void {
     (this.configValues as unknown as Record<string, unknown>)[key] = value;
     this.sources[key] = { source, value };
+  }
+
+  setExtra(key: string, value: unknown): void {
+    (this.configValues as unknown as Record<string, unknown>)[key] = value;
+    this.sources[key as keyof AppConfig] = { source: 'memory', value };
   }
 
   private parseValue(value: string, key: keyof AppConfig): string | number | boolean | undefined {

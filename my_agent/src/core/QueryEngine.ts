@@ -4,6 +4,7 @@ import { toolRegistry } from '../tools/registry.js';
 import { permissions } from '../services/permissions.js';
 import { terminal } from '../ui/terminal.js';
 import { ToolExecutionError, formatError, errorHandler } from '../utils/errors.js';
+import { globalEventEmitter } from '../services/events/index.js';
 
 /**
  * 最多允许的对话轮数（每轮可能包含多个工具调用）
@@ -206,7 +207,13 @@ export class QueryEngine {
     try {
       const result = await tool.execute(toolCall.input);
       console.log(terminal.renderToolResult(result));
-      // 通过回调通知工具执行完成
+
+      globalEventEmitter.emit('tool:execute', {
+        tool: toolCall.name,
+        input: toolCall.input,
+        output: result,
+      });
+
       callbacks.onChunk?.(`\n${terminal.renderSuccess('[Tool executed] ')}`);
       return JSON.stringify({
         type: 'tool_result',
@@ -214,7 +221,12 @@ export class QueryEngine {
         content: result,
       });
     } catch (error) {
-      // 工具执行出错
+      globalEventEmitter.emit('tool:error', {
+        tool: toolCall.name,
+        error: error instanceof Error ? error.message : String(error),
+        input: toolCall.input,
+      });
+
       const appError = new ToolExecutionError(
         toolCall.name,
         error instanceof Error ? error.message : String(error)
