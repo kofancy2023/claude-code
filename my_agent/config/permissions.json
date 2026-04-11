@@ -1,0 +1,28 @@
+{
+  "defaultMode": "allow_all",
+  "allowedTools": ["*"],
+  "deniedTools": [],
+  "allowedCommands": [],
+  "allowNetwork": true,
+  "allowEnvAccess": true,
+  "rules": [
+    {
+      "tool": "BashTool",
+      "command": "rm",
+      "allow": false,
+      "description": "禁止删除命令"
+    },
+    {
+      "tool": "BashTool",
+      "command": "sudo",
+      "allow": false,
+      "description": "禁止提权命令"
+    },
+    {
+      "tool": "BashTool",
+      "command": "rm -rf /",
+      "allow": false,
+      "description": "禁止删除根目录"
+    }
+  ]
+}
