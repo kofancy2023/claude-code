@@ -1,9 +1,57 @@
+/**
+ * GitHub 仓库工具
+ *
+ * 用于获取 GitHub 仓库信息和文件内容
+ *
+ * 功能：
+ * - 获取仓库基本信息（描述、星标数、分支等）
+ * - 列出仓库目录内容
+ * - 读取仓库文件内容（Base64 编码支持）
+ *
+ * 使用场景：
+ * - 查看仓库概览信息
+ * - 浏览仓库文件结构
+ * - 读取特定文件内容
+ */
+/**
+ * GitHub 仓库信息工具
+ *
+ * 获取 GitHub 仓库的详细信息
+ *
+ * 功能：
+ * - 获取仓库基本信息（描述、星标数、fork 数）
+ * - 查看仓库的目录结构
+ * - 读取指定路径的文件内容
+ * - 支持 Base64 编码的文件内容解码
+ *
+ * 使用场景：
+ * - 查看仓库的基本信息
+ * - 浏览仓库的目录结构
+ * - 读取特定文件的内容
+ */
 import type { Tool } from '../types/index.js';
 
+/**
+ * GitHub 仓库信息工具
+ *
+ * 获取仓库信息或文件内容
+ *
+ * 输入参数：
+ * - owner: 仓库所有者
+ * - repo: 仓库名称
+ * - path: 文件路径（可选，不指定则返回仓库信息）
+ *
+ * 返回：
+ * - 未指定 path：返回仓库的基本信息
+ * - 指定 path：返回目录列表或文件内容
+ */
 export const GitHubRepoTool: Tool = {
+  /** 工具名称 */
   name: 'GitHubRepoTool',
+  /** 工具描述 */
   description: 'Get information about a GitHub repository. Use this to fetch repo details, file listings, or contents.',
 
+  /** 输入参数 schema */
   inputSchema: {
     type: 'object',
     properties: {
@@ -23,6 +71,20 @@ export const GitHubRepoTool: Tool = {
     required: ['owner', 'repo'],
   },
 
+  /**
+   * 获取仓库信息或文件内容
+   *
+   * 执行流程：
+   * 1. 验证输入参数
+   * 2. 确定请求类型（仓库信息还是文件内容）
+   * 3. 构建对应的 GitHub API 请求
+   * 4. 处理响应数据
+   * 5. 如果是文件内容，进行 Base64 解码
+   * 6. 格式化输出结果
+   *
+   * @param input - 包含 owner, repo 和可选的 path 字段
+   * @returns 仓库信息或文件内容的格式化字符串
+   */
   execute: async (input: Record<string, unknown>): Promise<string> => {
     const owner = input.owner as string;
     const repo = input.repo as string;

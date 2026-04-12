@@ -138,7 +138,7 @@ export class CommandSanitizer {
     'mkfs',
     'dd if=',
     '> /dev/sda',
-    'wget.*curl.*\|',
+    '(wget|curl).*\\|\\s*(bash|sh|korn)',
     'nc -e',
     '/dev/tcp/',
     'exec.*socket',
@@ -305,13 +305,15 @@ export class SecretScanner {
       const matches = text.match(pattern);
       if (matches) {
         for (const match of matches) {
+          if (!match) continue;
+          const startIndex = text.indexOf(match);
           findings.push({
             type: name,
             match: this.maskSecret(match),
             severity,
             range: {
-              start: text.indexOf(match),
-              end: text.indexOf(match) + match.length,
+              start: startIndex,
+              end: startIndex + match.length,
             },
           });
         }

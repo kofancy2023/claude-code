@@ -1,9 +1,55 @@
+/**
+ * GitHub 用户工具
+ *
+ * 用于获取 GitHub 用户或组织的信息
+ *
+ * 功能：
+ * - 获取用户基本信息（姓名、公司、位置等）
+ * - 获取用户的仓库统计（公开仓库、星标、 followers 等）
+ * - 支持用户类型筛选（user 或 org）
+ * - 对于组织，额外显示描述信息
+ *
+ * 使用场景：
+ * - 查找开发者信息
+ * - 查看组织详情
+ * - 了解用户的开源贡献情况
+ */
+/**
+ * GitHub 用户信息工具
+ *
+ * 查询 GitHub 用户或组织的信息
+ *
+ * 功能：
+ * - 获取用户基本信息（名称、公司、位置、简介）
+ * - 获取用户的仓库统计（公开仓库、Gist、关注者）
+ * - 获取组织的额外信息（如描述）
+ * - 支持按类型筛选（user 或 org）
+ *
+ * 使用场景：
+ * - 查看某个 GitHub 用户的信息
+ * - 了解某个组织的详情
+ * - 查找用户的联系方式和社交信息
+ */
 import type { Tool } from '../types/index.js';
 
+/**
+ * GitHub 用户信息工具
+ *
+ * 查询用户或组织的 GitHub 信息
+ *
+ * 输入参数：
+ * - username: GitHub 用户名或组织名
+ * - type: 筛选类型：user 或 org（可选）
+ *
+ * 返回：用户的详细信息，包括仓库数、关注者数、加入时间等
+ */
 export const GitHubUserTool: Tool = {
+  /** 工具名称 */
   name: 'GitHubUserTool',
+  /** 工具描述 */
   description: 'Get information about a GitHub user or organization. Use this to look up user profiles, organization details, or check user activity.',
 
+  /** 输入参数 schema */
   inputSchema: {
     type: 'object',
     properties: {
@@ -19,6 +65,21 @@ export const GitHubUserTool: Tool = {
     required: ['username'],
   },
 
+  /**
+   * 获取用户或组织信息
+   *
+   * 执行流程：
+   * 1. 验证输入参数
+   * 2. 构建 GitHub API 请求
+   * 3. 调用 GitHub 用户 API
+   * 4. 处理响应数据
+   * 5. 检查类型筛选条件
+   * 6. 如果是组织，获取额外描述信息
+   * 7. 格式化输出结果
+   *
+   * @param input - 包含 username 和可选的 type 字段
+   * @returns 用户或组织信息的格式化字符串
+   */
   execute: async (input: Record<string, unknown>): Promise<string> => {
     const username = input.username as string;
     const typeFilter = input.type as string | undefined;

@@ -1,9 +1,54 @@
+/**
+ * GitHub 分支工具
+ *
+ * 用于列出 GitHub 仓库中的所有分支
+ *
+ * 功能：
+ * - 列出仓库的所有分支
+ * - 支持筛选保护分支
+ * - 显示分支的提交信息和状态检查状态
+ *
+ * 使用场景：
+ * - 查看仓库有哪些分支
+ * - 查找特定分支
+ * - 检查保护分支的配置
+ */
+/**
+ * GitHub 分支工具
+ *
+ * 用于查看 GitHub 仓库的分支信息
+ *
+ * 功能：
+ * - 列出仓库的所有分支
+ * - 筛选受保护的分支
+ * - 显示分支的提交 SHA 和状态检查信息
+ *
+ * 使用场景：
+ * - 查看仓库有哪些分支
+ * - 查找受保护的分支
+ * - 了解分支的最后提交信息
+ */
 import type { Tool } from '../types/index.js';
 
+/**
+ * GitHub 分支工具
+ *
+ * 列出 GitHub 仓库中的分支信息
+ *
+ * 输入参数：
+ * - owner: 仓库所有者（用户名或组织）
+ * - repo: 仓库名称
+ * - protected: 是否只显示受保护的分支（可选）
+ *
+ * 返回：格式化的分支列表，包含保护状态和最后提交信息
+ */
 export const GitHubBranchTool: Tool = {
+  /** 工具名称 */
   name: 'GitHubBranchTool',
+  /** 工具描述 */
   description: 'List branches in a GitHub repository. Use this to see all branches, protected branches, or find specific branches.',
 
+  /** 输入参数 schema */
   inputSchema: {
     type: 'object',
     properties: {
@@ -23,6 +68,20 @@ export const GitHubBranchTool: Tool = {
     required: ['owner', 'repo'],
   },
 
+  /**
+   * 获取仓库分支列表
+   *
+   * 执行流程：
+   * 1. 验证输入参数
+   * 2. 构建 GitHub API 请求头
+   * 3. 调用 GitHub API 获取分支列表
+   * 4. 处理响应数据
+   * 5. 如果需要，筛选保护分支
+   * 6. 格式化输出结果
+   *
+   * @param input - 包含 owner, repo 和可选的 protected 字段
+   * @returns 分支列表的格式化字符串
+   */
   execute: async (input: Record<string, unknown>): Promise<string> => {
     const owner = input.owner as string;
     const repo = input.repo as string;

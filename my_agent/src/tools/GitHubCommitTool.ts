@@ -1,9 +1,40 @@
+/**
+ * GitHub 提交历史工具
+ *
+ * 查看 GitHub 仓库的提交记录
+ *
+ * 功能：
+ * - 查看最近的提交历史
+ * - 显示提交作者和信息
+ * - 支持按分支或 SHA 筛选
+ *
+ * 使用场景：
+ * - 查看项目的提交历史
+ * - 了解某个分支的所有提交
+ * - 查看特定提交的详细信息
+ */
 import type { Tool } from '../types/index.js';
 
+/**
+ * GitHub 提交历史工具
+ *
+ * 获取仓库的提交记录
+ *
+ * 输入参数：
+ * - owner: 仓库所有者
+ * - repo: 仓库名称
+ * - sha: 起始提交 SHA 或分支名（可选）
+ * - limit: 返回的提交数量（默认 10）
+ *
+ * 返回：格式化的提交列表，包含 SHA、消息、作者和日期
+ */
 export const GitHubCommitTool: Tool = {
+  /** 工具名称 */
   name: 'GitHubCommitTool',
+  /** 工具描述 */
   description: 'View commit history in a GitHub repository. Use this to see recent commits, author info, and commit messages.',
 
+  /** 输入参数 schema */
   inputSchema: {
     type: 'object',
     properties: {
@@ -27,6 +58,20 @@ export const GitHubCommitTool: Tool = {
     required: ['owner', 'repo'],
   },
 
+  /**
+   * 获取提交历史
+   *
+   * 执行流程：
+   * 1. 验证输入参数
+   * 2. 构建 GitHub API 请求
+   * 3. 调用 GitHub 提交 API
+   * 4. 处理响应数据
+   * 5. 提取提交信息（SHA、消息、作者、日期）
+   * 6. 格式化输出结果
+   *
+   * @param input - 包含 owner, repo, sha(可选) 和 limit(可选) 字段
+   * @returns 提交历史的格式化字符串
+   */
   execute: async (input: Record<string, unknown>): Promise<string> => {
     const owner = input.owner as string;
     const repo = input.repo as string;

@@ -1,0 +1,150 @@
+import { describe, it, expect, beforeEach } from 'vitest';
+import { toolRegistry } from '../../tools/registry.js';
+
+describe('ToolRegistry', () => {
+  beforeEach(() => {
+  });
+
+  it('should have registered default tools', () => {
+    const tools = toolRegistry.getAll();
+    expect(tools.length).toBeGreaterThan(0);
+  });
+
+  it('should register BashTool', () => {
+    const tool = toolRegistry.get('BashTool');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('BashTool');
+  });
+
+  it('should register FileReadTool', () => {
+    const tool = toolRegistry.get('FileReadTool');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('FileReadTool');
+  });
+
+  it('should register FileWriteTool', () => {
+    const tool = toolRegistry.get('FileWriteTool');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('FileWriteTool');
+  });
+
+  it('should register GlobTool', () => {
+    const tool = toolRegistry.get('GlobTool');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('GlobTool');
+  });
+
+  it('should register WebSearchTool', () => {
+    const tool = toolRegistry.get('WebSearchTool');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('WebSearchTool');
+  });
+
+  it('should register GitHubBranchTool', () => {
+    const tool = toolRegistry.get('GitHubBranchTool');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('GitHubBranchTool');
+  });
+
+  it('should check if tool exists using has()', () => {
+    expect(toolRegistry.has('BashTool')).toBe(true);
+    expect(toolRegistry.has('NonExistentTool')).toBe(false);
+  });
+
+  it('should get all registered tools', () => {
+    const tools = toolRegistry.getAll();
+    expect(Array.isArray(tools)).toBe(true);
+    expect(tools.length).toBeGreaterThanOrEqual(14);
+  });
+
+  it('should have tool with valid inputSchema', () => {
+    const bashTool = toolRegistry.get('BashTool');
+    expect(bashTool?.inputSchema).toBeDefined();
+    expect(bashTool?.inputSchema.type).toBe('object');
+    expect(bashTool?.inputSchema.properties).toBeDefined();
+  });
+
+  it('should have tool with description', () => {
+    const bashTool = toolRegistry.get('BashTool');
+    expect(bashTool?.description).toBeDefined();
+    expect(typeof bashTool?.description).toBe('string');
+    expect(bashTool?.description.length).toBeGreaterThan(0);
+  });
+
+  it('should return undefined for non-existent tool', () => {
+    const tool = toolRegistry.get('NonExistentTool');
+    expect(tool).toBeUndefined();
+  });
+
+  it('should have execute function for each tool', () => {
+    const tools = toolRegistry.getAll();
+    tools.forEach((tool) => {
+      expect(typeof tool.execute).toBe('function');
+    });
+  });
+
+  it('should have unique tool names', () => {
+    const tools = toolRegistry.getAll();
+    const names = tools.map(t => t.name);
+    const uniqueNames = new Set(names);
+    expect(names.length).toBe(uniqueNames.size);
+  });
+
+  it('should register EditTool', () => {
+    const tool = toolRegistry.get('EditTool');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('EditTool');
+  });
+
+  it('should register FileListTool', () => {
+    const tool = toolRegistry.get('FileListTool');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('FileListTool');
+  });
+
+  it('should register GitHubUserTool', () => {
+    const tool = toolRegistry.get('GitHubUserTool');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('GitHubUserTool');
+  });
+
+  it('should register GitHubRepoTool', () => {
+    const tool = toolRegistry.get('GitHubRepoTool');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('GitHubRepoTool');
+  });
+
+  it('should register GitHubIssueTool', () => {
+    const tool = toolRegistry.get('GitHubIssueTool');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('GitHubIssueTool');
+  });
+
+  it('should register GitHubCodeSearchTool', () => {
+    const tool = toolRegistry.get('GitHubCodeSearchTool');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('GitHubCodeSearchTool');
+  });
+
+  it('should register GitHubPullRequestTool', () => {
+    const tool = toolRegistry.get('GitHubPullRequestTool');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('GitHubPullRequestTool');
+  });
+
+  it('should register GitHubCommitTool', () => {
+    const tool = toolRegistry.get('GitHubCommitTool');
+    expect(tool).toBeDefined();
+    expect(tool?.name).toBe('GitHubCommitTool');
+  });
+
+  it('should have required fields for all tools', () => {
+    const tools = toolRegistry.getAll();
+    tools.forEach((tool) => {
+      expect(tool).toHaveProperty('name');
+      expect(tool).toHaveProperty('description');
+      expect(tool).toHaveProperty('inputSchema');
+      expect(tool).toHaveProperty('execute');
+    });
+  });
+});
