@@ -11,6 +11,7 @@ import { ToolChainExecutor } from '../services/tool-chain.js';
 import { QueryEngine } from './QueryEngine.js';
 import { commandRegistry } from './commands.js';
 import { createAutoCommand } from './auto-command.js';
+import { ReadlineEnhancer, readlineEnhancer } from './readline-enhancer.js';
 import type { Message } from '../types/index.js';
 
 /**
@@ -76,7 +77,10 @@ export class Repl {
       input: process.stdin,
       output: process.stdout,
       prompt: '> ',
+      completer: readlineEnhancer.createCompleter(),
     });
+
+    readlineEnhancer.attach(this.rl);
 
     // 注册自主执行命令
     const autoCmd = createAutoCommand(client);
@@ -320,6 +324,7 @@ export class Repl {
    * - onChunk: 处理每个文本片段
    * - onComplete: 处理完成时的统计信息
    * - onError: 处理错误
+   * - onConfirm: 处理用户确认请求
    */
   private createStreamCallbacks(): StreamCallbacks {
     let tokenCount = 0;
@@ -343,6 +348,28 @@ export class Repl {
       onError: (error: Error) => {
         process.stdout.write('\n');
         console.error(terminal.renderError(error.message));
+      },
+      // 用户确认请求
+      onConfirm: async (message: string, diff?: string[]): Promise<boolean> => {
+        process.stdout.write('\n');
+        console.log(terminal.renderConfirmation(message));
+        if (diff && diff.length > 0) {
+          console.log(terminal.renderDiff(diff));
+        }
+        process.stdout.write('\n');
+
+        const rl = readline.createInterface({
+          input: process.stdin,
+          output: process.stdout,
+        });
+
+        return new Promise<boolean>((resolve) => {
+          rl.question('Confirm? (y/n): ', (answer: string) => {
+            rl.close();
+            const confirmed = answer.toLowerCase() === 'y' || answer.toLowerCase() === 'yes';
+            resolve(confirmed);
+          });
+        });
       },
     };
   }
