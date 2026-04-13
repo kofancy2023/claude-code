@@ -7,6 +7,7 @@ import { terminal } from '../ui/terminal.js';
 import { permissions } from '../services/permissions.js';
 import { errorHandler } from '../utils/errors.js';
 import { config, ConfigValidationError } from '../config/index.js';
+import { getPluginManager } from '../plugins/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -76,6 +77,16 @@ export async function runCLI(): Promise<void> {
 
   loadPermissionsConfig();
   configureErrorReporting();
+
+  const pluginManager = getPluginManager();
+  try {
+    await pluginManager.initialize();
+    const stats = pluginManager.getStats();
+    console.log(terminal.renderInfo(`Plugins: ${stats.pluginCount} loaded, ${stats.toolCount} tools available`));
+  } catch (error) {
+    console.log(terminal.renderWarning(`Plugin initialization failed: ${error instanceof Error ? error.message : String(error)}`));
+    console.log(terminal.renderInfo('Continuing without plugins...'));
+  }
 
   console.log(terminal.renderDivider());
 

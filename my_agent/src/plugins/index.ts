@@ -10,6 +10,10 @@
 // 类型定义
 export * from './types.js';
 
+// 插件管理器
+export { PluginManager, getPluginManager } from './manager.js';
+export type { PluginManagerOptions } from './manager.js';
+
 // 插件加载器
 export { PluginLoader, createPluginLoader } from './loader.js';
 export type { PluginLoaderOptions, LoadResult } from './loader.js';

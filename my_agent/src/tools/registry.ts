@@ -110,6 +110,16 @@ export class ToolRegistry {
   has(name: string): boolean {
     return this.tools.has(name);
   }
+
+  /**
+   * 注销工具
+   *
+   * @param name - 工具名称
+   * @returns 是否成功注销
+   */
+  unregister(name: string): boolean {
+    return this.tools.delete(name);
+  }
 }
 
 /**
