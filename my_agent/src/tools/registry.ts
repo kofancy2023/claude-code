@@ -21,6 +21,97 @@ import { GitHubBranchTool } from './GitHubBranchTool.js';
 import { GitHubUserTool } from './GitHubUserTool.js';
 
 /**
+ * 参数别名映射表
+ *
+ * AI 返回的参数名可能与工具实际定义的参数名不一致。
+ * 此表定义了各工具的参数别名映射，将 AI 常用的参数名映射到标准参数名。
+ *
+ * 格式: { 工具名: { 别名: 标准参数名 } }
+ */
+const PARAM_ALIASES: Record<string, Record<string, string>> = {
+  GrepTool: {
+    'file_path': 'path',
+    'filePath': 'path',
+    'regex': 'pattern',
+    'flags': 'options',
+  },
+  EditTool: {
+    'file_path': 'path',
+    'filePath': 'path',
+    'new_content': 'newString',
+    'newContent': 'newString',
+    'old_content': 'oldString',
+    'oldContent': 'oldString',
+    'replacement': 'newString',
+  },
+  FileReadTool: {
+    'file_path': 'path',
+    'filePath': 'path',
+    'filename': 'path',
+  },
+  FileWriteTool: {
+    'file_path': 'path',
+    'filePath': 'path',
+    'filename': 'path',
+    'content': 'content',
+    'text': 'content',
+  },
+  FileListTool: {
+    'directory': 'path',
+    'dir': 'path',
+    'folder': 'path',
+  },
+  GlobTool: {
+    'directory': 'path',
+    'dir': 'path',
+    'folder': 'path',
+    'pattern': 'pattern',
+  },
+  MkdirTool: {
+    'directory': 'path',
+    'dir': 'path',
+    'folder': 'path',
+    'name': 'path',
+  },
+  RmTool: {
+    'file_path': 'path',
+    'filePath': 'path',
+    'filename': 'path',
+    'target': 'path',
+    'recursive': 'recursive',
+    'force': 'force',
+  },
+  CopyTool: {
+    'src': 'source',
+    'source_path': 'source',
+    'sourcePath': 'source',
+    'dest': 'destination',
+    'dst': 'destination',
+    'destination_path': 'destination',
+    'destinationPath': 'destination',
+  },
+  MoveTool: {
+    'src': 'source',
+    'source_path': 'source',
+    'sourcePath': 'source',
+    'dest': 'destination',
+    'dst': 'destination',
+    'destination_path': 'destination',
+    'destinationPath': 'destination',
+  },
+  BashTool: {
+    'cmd': 'command',
+    'shell': 'command',
+    'script': 'command',
+  },
+  WebSearchTool: {
+    'query': 'query',
+    'search': 'query',
+    'term': 'query',
+  },
+};
+
+/**
  * 工具注册表类
  *
  * 核心功能：管理所有可用工具的注册和查询
@@ -120,6 +211,48 @@ export class ToolRegistry {
   unregister(name: string): boolean {
     return this.tools.delete(name);
   }
+
+  /**
+   * 标准化工具参数
+   *
+   * 将 AI 返回的参数名（可能使用别名）转换为工具实际需要的标准参数名。
+   * 例如: { file_path: "xxx" } → { path: "xxx" }
+   *
+   * @param toolName - 工具名称
+   * @param params - AI 返回的原始参数
+   * @returns 标准化后的参数
+   */
+  normalizeParams(toolName: string, params: Record<string, unknown>): Record<string, unknown> {
+    const aliases = PARAM_ALIASES[toolName];
+    if (!aliases) {
+      return params;
+    }
+
+    const normalized: Record<string, unknown> = {};
+    for (const [key, value] of Object.entries(params)) {
+      const standardKey = aliases[key] || key;
+      normalized[standardKey] = value;
+    }
+    return normalized;
+  }
+}
+
+/**
+ * 标准化工具参数
+ *
+ * 将 AI 返回的参数名（可能使用别名）转换为工具实际需要的标准参数名。
+ * 这是对外提供的便捷函数。
+ *
+ * @param toolName - 工具名称
+ * @param params - AI 返回的原始参数
+ * @returns 标准化后的参数
+ *
+ * @example
+ * const normalized = normalizeToolParams('GrepTool', { file_path: 'test.ts', regex: 'TODO' });
+ * // 结果: { path: 'test.ts', pattern: 'TODO' }
+ */
+export function normalizeToolParams(toolName: string, params: Record<string, unknown>): Record<string, unknown> {
+  return toolRegistry.normalizeParams(toolName, params);
 }
 
 /**

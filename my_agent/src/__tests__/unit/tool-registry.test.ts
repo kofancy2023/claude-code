@@ -147,4 +147,60 @@ describe('ToolRegistry', () => {
       expect(tool).toHaveProperty('execute');
     });
   });
+
+  describe('normalizeParams', () => {
+    it('should normalize GrepTool parameters', () => {
+      const input = { file_path: 'test.ts', regex: 'TODO' };
+      const result = toolRegistry.normalizeParams('GrepTool', input);
+      expect(result).toEqual({ path: 'test.ts', pattern: 'TODO' });
+    });
+
+    it('should normalize EditTool parameters', () => {
+      const input = { file_path: 'test.ts', old_content: 'old', new_content: 'new' };
+      const result = toolRegistry.normalizeParams('EditTool', input);
+      expect(result).toEqual({ path: 'test.ts', oldString: 'old', newString: 'new' });
+    });
+
+    it('should normalize CopyTool parameters', () => {
+      const input = { src: 'a.txt', dest: 'b.txt' };
+      const result = toolRegistry.normalizeParams('CopyTool', input);
+      expect(result).toEqual({ source: 'a.txt', destination: 'b.txt' });
+    });
+
+    it('should normalize MoveTool parameters', () => {
+      const input = { source_path: 'a.txt', destination_path: 'b.txt' };
+      const result = toolRegistry.normalizeParams('MoveTool', input);
+      expect(result).toEqual({ source: 'a.txt', destination: 'b.txt' });
+    });
+
+    it('should normalize BashTool parameters', () => {
+      const input = { cmd: 'ls -la' };
+      const result = toolRegistry.normalizeParams('BashTool', input);
+      expect(result).toEqual({ command: 'ls -la' });
+    });
+
+    it('should not modify unknown tools parameters', () => {
+      const input = { foo: 'bar' };
+      const result = toolRegistry.normalizeParams('UnknownTool', input);
+      expect(result).toEqual({ foo: 'bar' });
+    });
+
+    it('should not modify parameters without aliases', () => {
+      const input = { path: 'test.ts', pattern: 'TODO' };
+      const result = toolRegistry.normalizeParams('GrepTool', input);
+      expect(result).toEqual({ path: 'test.ts', pattern: 'TODO' });
+    });
+
+    it('should handle camelCase aliases', () => {
+      const input = { filePath: 'test.ts', newContent: 'content' };
+      const result = toolRegistry.normalizeParams('EditTool', input);
+      expect(result).toEqual({ path: 'test.ts', newString: 'content' });
+    });
+
+    it('should preserve non-aliased parameters', () => {
+      const input = { path: 'test.ts', pattern: 'TODO', recursive: true };
+      const result = toolRegistry.normalizeParams('GrepTool', input);
+      expect(result).toEqual({ path: 'test.ts', pattern: 'TODO', recursive: true });
+    });
+  });
 });

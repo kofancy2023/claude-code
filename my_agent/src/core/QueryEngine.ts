@@ -203,14 +203,17 @@ export class QueryEngine {
       });
     }
 
-    // 步骤 3：执行工具
+    // 步骤 3：标准化参数（AI 可能使用别名）
+    const normalizedInput = toolRegistry.normalizeParams(toolCall.name, toolCall.input);
+
+    // 步骤 4：执行工具
     try {
-      const result = await tool.execute(toolCall.input);
+      const result = await tool.execute(normalizedInput);
       console.log(terminal.renderToolResult(result));
 
       globalEventEmitter.emit('tool:execute', {
         tool: toolCall.name,
-        input: toolCall.input,
+        input: normalizedInput,
         output: result,
       });
 
