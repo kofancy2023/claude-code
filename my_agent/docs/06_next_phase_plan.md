@@ -13,7 +13,7 @@
 | **REPL 循环** | `src/core/Repl.ts` | ✅ 完成 | 命令行交互、消息处理 |
 | **多轮工具调用** | `src/core/QueryEngine.ts` | ✅ 完成 | 工具循环执行 |
 | **CLI 命令系统** | `src/core/commands.ts` | ✅ 完成 | /help, /clear, /model 等 |
-| **工具注册表** | `src/tools/registry.ts` | ✅ 完成 | 15 个内置工具 |
+| **工具注册表** | `src/tools/registry.ts` | ✅ 完成 | 18 个内置工具 |
 | **AI 提供商** | `src/services/api/` | ✅ 完成 | Anthropic, OpenAI, GLM, Gemini |
 | **权限系统** | `src/services/permissions.ts` | ✅ 完成 | allow/deny/bypass 模式 |
 | **会话管理** | `src/services/session.ts` | ✅ 完成 | 保存/加载会话 |
@@ -23,19 +23,19 @@
 | **错误处理** | `src/utils/errors.ts` | ✅ 完成 | 统一错误类 |
 | **重试机制** | `src/utils/retry.ts` | ✅ 完成 | 指数退避 + 熔断器 |
 | **性能优化** | `src/utils/performance.ts` | ✅ 完成 | LRU 缓存、并发控制 |
-| **测试框架** | `vitest.config.ts` | ⚠️ 配置完成 | 仅 3 个基础测试 |
+| **测试框架** | `vitest.config.ts` | ✅ 完成 | **157 个测试全部通过** |
+| **安全模块** | `src/utils/security.ts` | ✅ 完成 | 输入验证、命令注入防护 |
+| **MCP 支持** | `src/mcp/` | ✅ 完成 | FileSystem/GitHub Provider |
+| **Webhook/事件** | `src/events/` | ✅ 完成 | 发布-订阅 + 外部回调 |
+| **UI 终端** | `src/ui/terminal.ts` | ✅ 完成 | ANSI 颜色、进度条 |
 
 ### 1.2 缺失功能 ❌
 
 | 功能 | 优先级 | 当前状态 |
 |------|--------|----------|
-| 完整测试套件 | P1 | 仅有 3 个基础测试 |
-| 安全加固 | P1 | 仅有框架 |
-| 常用工具补充 | P2 | 缺少 GrepTool 等 |
-| MCP 支持 | P2 | 未实现 |
-| Webhook/回调 | P2 | 仅有框架 |
-| Agent 模式 | P3 | 需验证 |
 | 插件系统 | P3 | 未实现 |
+| Agent 自主模式 | P3 | 需验证 |
+| 分布式支持 | P3 | 未实现 |
 
 ---
 
