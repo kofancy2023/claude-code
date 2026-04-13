@@ -384,14 +384,14 @@ export class Repl {
     const messages = this.store.getMessages();
     const model = (this.client as unknown as { model?: string }).model;
 
-    // 检查是否需要上下文截断
+    // 显示上下文使用状态
+    const contextBar = this.contextManager.renderContextBar(messages, model);
+    console.log(terminal.renderInfo(`Context: ${contextBar}`));
+
+    // 检查是否需要上下文截断，使用智能截断策略
     if (this.contextManager.needsTruncation(messages, model)) {
-      console.log(terminal.renderInfo('[Context truncated for efficiency]'));
-      return this.contextManager.truncateMessages(messages, {
-        maxTokens: 100000,           // 目标保留 100K tokens
-        preserveSystemMessage: true, // 始终保留系统消息
-        preserveLastMessages: 3,    // 保留最后 3 条消息
-      });
+      console.log(terminal.renderInfo('[Applying smart context truncation...]'));
+      return this.contextManager.smartTruncate(messages, model);
     }
 
     return messages;

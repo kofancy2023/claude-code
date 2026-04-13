@@ -343,6 +343,136 @@ export class ContextManager {
       needsTruncation: currentTokens > maxTokens,
     };
   }
+
+  /**
+   * 压缩工具调用结果
+   *
+   * 对于过长的工具结果，进行截断和标记
+   * 保留首尾关键信息，中间部分用省略号
+   *
+   * @param message - 消息对象
+   * @param maxLength - 最大字符长度（默认 500）
+   * @returns 压缩后的消息
+   */
+  compressToolResult(message: Message, maxLength: number = 500): Message {
+    if (message.role !== 'assistant') {
+      return message;
+    }
+
+    if (typeof message.content === 'string') {
+      return message;
+    }
+
+    const compressedContent = message.content.map((block) => {
+      if (block.type !== 'tool_result') {
+        return block;
+      }
+
+      const content = block.content;
+      if (content.length <= maxLength) {
+        return block;
+      }
+
+      // 保留前 200 和后 200 字符
+      const head = content.slice(0, 200);
+      const tail = content.slice(-200);
+      const compressed = `${head}\n...[truncated ${content.length - 400} chars]...\n${tail}`;
+
+      return {
+        ...block,
+        content: compressed,
+        is_truncated: true,
+      };
+    });
+
+    return { ...message, content: compressedContent };
+  }
+
+  /**
+   * 批量压缩消息列表中的工具结果
+   *
+   * @param messages - 消息列表
+   * @param maxLength - 每个工具结果的最大字符长度
+   * @returns 压缩后的消息列表
+   */
+  compressAllToolResults(messages: Message[], maxLength: number = 500): Message[] {
+    return messages.map((msg) => this.compressToolResult(msg, maxLength));
+  }
+
+  /**
+   * 生成上下文使用状态的可视化字符串
+   *
+   * @param messages - 消息列表
+   * @param model - 模型名称
+   * @returns 可视化状态条字符串
+   */
+  renderContextBar(messages: Message[], model?: string): string {
+    const status = this.getContextStatus(messages, model);
+    const barLength = 20;
+    const filledLength = Math.round((status.utilizationPercent / 100) * barLength);
+    const emptyLength = barLength - filledLength;
+
+    const bar = '█'.repeat(filledLength) + '░'.repeat(emptyLength);
+    const color = status.utilizationPercent > 80 ? '\x1b[33m' : '\x1b[32m';
+    const reset = '\x1b[0m';
+
+    return `${color}[${bar}]${reset} ${status.currentTokens}/${status.maxTokens} tokens (${status.utilizationPercent}%)`;
+  }
+
+  /**
+   * 智能截断策略
+   *
+   * 根据当前上下文使用情况，动态选择截断策略：
+   * - < 60%: 不截断
+   * - 60-80%: 压缩工具结果
+   * - 80-90%: 截断中间消息 + 压缩工具结果
+   * - > 90%:激进截断
+   *
+   * @param messages - 消息列表
+   * @param model - 模型名称
+   * @returns 截断后的消息列表
+   */
+  smartTruncate(messages: Message[], model?: string): Message[] {
+    const status = this.getContextStatus(messages, model);
+
+    // 上下文充足，无需处理
+    if (status.utilizationPercent < 60) {
+      return messages;
+    }
+
+    let processed = [...messages];
+
+    // 60-80%: 先尝试压缩工具结果
+    if (status.utilizationPercent >= 60 && status.utilizationPercent < 80) {
+      processed = this.compressAllToolResults(processed);
+      if (!this.needsTruncation(processed, model)) {
+        return processed;
+      }
+    }
+
+    // 80-90%: 截断中间消息
+    if (status.utilizationPercent >= 80 && status.utilizationPercent < 90) {
+      processed = this.truncateMessages(processed, {
+        maxTokens: this.getModelContextWindow(model) * 0.6,
+        preserveSystemMessage: true,
+        preserveLastMessages: 4,
+      });
+      if (!this.needsTruncation(processed, model)) {
+        return processed;
+      }
+    }
+
+    // > 90%: 激进截断
+    if (status.utilizationPercent >= 90) {
+      processed = this.truncateMessages(processed, {
+        maxTokens: this.getModelContextWindow(model) * 0.5,
+        preserveSystemMessage: true,
+        preserveLastMessages: 2,
+      });
+    }
+
+    return processed;
+  }
 }
 
 /**
