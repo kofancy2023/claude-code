@@ -7,5 +7,8 @@ export {
   WebhookConfig,
   globalEventEmitter,
   webhookDispatcher,
+  globalWebhookManager,
+  registerWebhookForEvent,
+  unregisterWebhookForEvent,
   type AgentEventMap,
 } from '../events.js';

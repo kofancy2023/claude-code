@@ -464,6 +464,120 @@ try {
 4. **并发控制**: 高频事件使用 `@ConcurrencyLimit` 限制并发
 5. **防抖节流**: UI 相关事件使用 `@Debounce` 或 `@Throttle`
 
+## 系统集成
+
+Webhook 模块已集成到 `src/services/events.ts`，与系统事件无缝衔接。
+
+### 代理事件类型
+
+```typescript
+interface AgentEventMap {
+  'tool:execute': { tool: string; input: unknown; output?: string };
+  'tool:error': { tool: string; error: string; input: unknown };
+  'message:send': { role: 'user' | 'assistant'; content: string };
+  'message:receive': { role: 'user' | 'assistant'; content: string };
+  'error:occur': { code: string; message: string };
+  'token:usage': { promptTokens: number; completionTokens: number };
+  'session:start': { sessionId: string };
+  'session:end': { sessionId: string };
+  'config:change': { key: string; value: unknown };
+  'circuit:open': { name: string };
+  'circuit:close': { name: string };
+  'rate:limit': { provider: string; retryAfter?: number };
+}
+```
+
+### 全局导出
+
+```typescript
+import {
+  globalEventEmitter,      // 全局事件发射器
+  globalWebhookManager,    // 全局 Webhook 管理器
+  registerWebhookForEvent,  // 便捷方法：注册 Webhook
+  webhookDispatcher,        // Webhook 调度器
+} from './services/events';
+```
+
+### 使用示例
+
+#### 1. 监听工具执行事件
+
+```typescript
+import { globalEventEmitter } from './services/events';
+
+globalEventEmitter.on('tool:execute', (data) => {
+  console.log(`工具执行: ${data.tool}`, data.input);
+});
+```
+
+#### 2. 绑定事件到外部 Webhook
+
+```typescript
+import { registerWebhookForEvent } from './services/events';
+
+// 当工具执行失败时，自动发送通知到 Slack
+registerWebhookForEvent('tool:error', {
+  name: '错误通知',
+  url: 'https://hooks.slack.com/services/xxx',
+  events: ['tool:error'],
+  retries: 3,
+});
+
+// 现在任何工具错误都会自动发送到 Slack
+globalEventEmitter.emit('tool:error', {
+  tool: 'Bash',
+  error: 'Permission denied'
+});
+```
+
+#### 3. 直接使用 Webhook 管理器
+
+```typescript
+import { globalWebhookManager, globalEventEmitter } from './services/events';
+import { WebhookEventType, WebhookDestinationType } from './events/types';
+
+// 创建 Webhook
+const webhook = globalWebhookManager.createWebhook({
+  name: '文件变更通知',
+  events: [WebhookEventType.FileChanged],
+  destinations: [{
+    id: 'dest1',
+    name: '我的服务器',
+    type: WebhookDestinationType.Http,
+    url: 'https://api.example.com/webhook',
+    enabled: true,
+  }],
+  enabled: true,
+});
+
+// 绑定事件到 Webhook
+globalEventEmitter.bindToWebhook('tool:execute', webhook.id);
+
+// 触发事件时，自动调用 Webhook
+globalEventEmitter.emit('tool:execute', {
+  tool: 'Bash',
+  input: { command: 'ls' }
+});
+```
+
+#### 4. 自动触发机制
+
+当 `globalEventEmitter.emit()` 被调用时：
+
+1. 执行所有注册的监听器
+2. 如果事件绑定了 Webhook，自动触发 Webhook 投递
+3. Webhook 按配置的策略（重试、超时等）投递到目的地
+
+```typescript
+// 触发事件 + 自动 Webhook
+globalEventEmitter.emit('tool:execute', {
+  tool: 'Edit',
+  input: { path: '/src/index.ts' }
+});
+// → 执行监听器
+// → 自动投递到绑定的 Webhook 目的地
+```
+
 ## 下一步计划
 
 - [ ] WebSocket 目的地支持

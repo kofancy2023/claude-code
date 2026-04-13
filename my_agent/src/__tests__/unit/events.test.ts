@@ -10,7 +10,6 @@ import {
   EventEmitterImpl,
 } from '../../events/emitter.js';
 import {
-  createWebhookManager,
   WebhookManagerImpl,
 } from '../../events/webhook.js';
 import {
