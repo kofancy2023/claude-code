@@ -154,138 +154,32 @@ export function maskSecrets(text: string): string {
 
 ---
 
-### 第三阶段：常用工具补充 (1-2天)
+### 第三阶段：分布式支持 (5-7天)
 
-**缺失的常用工具：**
-
-| 工具 | 功能 | 实现难度 |
-|------|------|----------|
-| GrepTool | 文件内容搜索 | 🟡 中 |
-| ReadLineTool | 逐行读取文件 | 🟢 低 |
-| MkdirTool | 创建目录 | 🟢 低 |
-| RmTool | 删除文件/目录 | 🟢 低 |
-| CopyTool | 复制文件 | 🟢 低 |
-| MoveTool | 移动文件 | 🟢 低 |
-
-**GrepTool 实现示例：**
-```typescript
-// src/tools/GrepTool.ts
-export const GrepTool: Tool = {
-  name: 'GrepTool',
-  description: 'Search for patterns in files',
-
-  inputSchema: {
-    type: 'object',
-    properties: {
-      pattern: { type: 'string', description: 'Search pattern (regex)' },
-      path: { type: 'string', description: 'Directory to search' },
-      recursive: { type: 'boolean', default: true },
-      caseSensitive: { type: 'boolean', default: false },
-    },
-    required: ['pattern', 'path'],
-  },
-
-  execute: async (input) => {
-    // 实现 grep 逻辑
-  },
-};
-```
-
----
-
-### 第四阶段：MCP 支持 (2-3天)
-
-**MCP (Model Context Protocol)** 是 Claude Code 连接外部工具的标准协议。
+**目标：** 支持多实例协同工作
 
 **架构设计：**
 ```
 ┌─────────────────────────────────────────────────────┐
-│                    My Agent                         │
+│                   分布式架构                         │
 ├─────────────────────────────────────────────────────┤
-│  MCP Client                                        │
-│  ├── FileSystemResourceProvider                    │
-│  ├── GitHubResourceProvider                         │
-│  ├── PostgreSQLResourceProvider                    │
-│  └── CustomResourceProvider                        │
+│  ┌─────────┐  ┌─────────┐  ┌─────────┐           │
+│  │ Agent 1 │  │ Agent 2 │  │ Agent 3 │           │
+│  └────┬────┘  └────┬────┘  └────┬────┘           │
+│       │            │            │                  │
+│       └────────────┼────────────┘                  │
+│                    ▼                                │
+│            ┌────────────┐                          │
+│            │   消息队列   │                         │
+│            │  (Redis)   │                          │
+│            └────────────┘                          │
 └─────────────────────────────────────────────────────┘
 ```
 
-**实现步骤：**
-1. 定义 MCP 协议接口
-2. 实现 MCP 客户端
-3. 添加 FileSystem 资源提供者
-4. 添加 GitHub 资源提供者
-
----
-
-### 第五阶段：Webhook/回调机制 (2-3天)
-
-**使用场景：**
-```typescript
-const agent = new MyAgent({
-  hooks: {
-    onToolExecute: (tool, input, output) => {
-      // 通知外部系统
-      fetch('https://webhook.example.com', {
-        method: 'POST',
-        body: JSON.stringify({ tool, input, output })
-      });
-    },
-    onError: (error) => { /* 上报错误 */ },
-    onTokenUsage: (tokens) => { /* 统计用量 */ }
-  }
-});
-```
-
----
-
-### 第六阶段：Agent 模式 (3-5天)
-
-**目标：** 支持自主决策执行，无需用户逐轮确认
-
 **实现方案：**
-```typescript
-// src/core/AgentRunner.ts
-export interface AgentConfig {
-  task: string;
-  maxIterations: number;
-  autoApprove: boolean;
-  onProgress?: (state: AgentState) => void;
-}
-
-export class AgentRunner {
-  async run(config: AgentConfig): Promise<AgentResult> {
-    // 1. 解析任务
-    // 2. 执行 QueryEngine 循环
-    // 3. 自动批准工具执行
-    // 4. 跟踪进度
-    // 5. 返回结果
-  }
-}
-```
-
----
-
-### 第七阶段：插件系统 (3-5天)
-
-**目标：** 支持外部扩展机制
-
-**接口设计：**
-```typescript
-interface Plugin {
-  name: string;
-  version: string;
-  tools?: Tool[];
-  hooks?: Record<string, Function>;
-  middleware?: Middleware[];
-}
-
-interface PluginManager {
-  load(plugin: Plugin): void;
-  unload(name: string): void;
-  getTools(): Tool[];
-}
-```
+- 消息队列集成
+- 分布式锁
+- 任务协调
 
 ---
 
@@ -294,37 +188,30 @@ interface PluginManager {
 ### 路径 A：快速产出优先 (推荐)
 
 ```
-Week 1: 第一阶段（测试框架）+ 第二阶段（安全加固）
-Week 2: 第三阶段（常用工具）+ 第四阶段（MCP 支持）
-Week 3: 第五阶段（Webhook）+ 第六阶段（Agent 模式）
-Week 4: 第七阶段（插件系统）+ 完善
+Week 1-2: 第一阶段（插件系统）
+Week 3-4: 第二阶段（Agent 自主模式）
+Week 5-6: 完善 + 分布式支持
 ```
 
 ### 路径 B：稳定优先
 
 ```
-Week 1-2: 第一阶段（测试框架）+ 完善现有测试
-Week 3-4: 第二阶段（安全加固）+ 安全审计
-Week 5-6: 第三阶段（常用工具）
-Week 7-8: 第四阶段 + 第五阶段
-Week 9-10: 第六阶段 + 第七阶段
+Week 1-2: 第一阶段（插件系统）+ 单元测试
+Week 3-4: 第二阶段（Agent 自主模式）+ 集成测试
+Week 5-6: 第三阶段（分布式支持）
 ```
 
 ---
 
-## 四、快速启动指南
+## 四、下一步行动
 
-### 下一步行动
+请选择下一步实施方向：
 
-请回复以下指令之一开始实施：
-
-| 指令 | 行动 |
-|------|------|
-| `继续测试` | 开始第一阶段：测试框架完善 |
-| `继续安全` | 开始第二阶段：安全加固 |
-| `继续工具` | 开始第三阶段：常用工具补充 |
-| `查看详情` | 获取某个阶段的详细实现方案 |
-| `跳过` | 直接进入特定阶段 |
+| 阶段 | 内容 | 预计时间 |
+|------|------|----------|
+| **第一阶段** | 插件系统 | 3-5天 |
+| **第二阶段** | Agent 自主模式 | 3-5天 |
+| **第三阶段** | 分布式支持 | 5-7天 |
 
 ---
 
