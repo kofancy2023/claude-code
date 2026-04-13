@@ -17,6 +17,8 @@ export interface TerminalTheme {
   info: string;
   /** 暗淡/辅助色（灰色）*/
   muted: string;
+  /** 标题色（青色）*/
+  header: string;
   /** 背景色 */
   background: string;
   /** 前景色 */
@@ -35,6 +37,7 @@ export const defaultTheme: TerminalTheme = {
   warning: '\x1b[33m',     // 黄色 - 警告状态
   info: '\x1b[34m',        // 蓝色 - 信息
   muted: '\x1b[90m',       // 灰色 - 暗淡/辅助文字
+  header: '\x1b[36m',      // 青色 - 标题（与 primary 相同）
   background: '\x1b[0m',   // 重置背景
   foreground: '\x1b[97m',  // 亮白色前景
 };
@@ -385,6 +388,42 @@ ${this.reset()}`;
    */
   writeStream(text: string, outputStream: NodeJS.WriteStream = process.stdout): void {
     outputStream.write(text);
+  }
+
+  /**
+   * 渲染文件 Diff
+   *
+   * @param diff - 统一格式的 diff 行数组
+   * @returns 格式化后的 diff 字符串
+   */
+  renderDiff(diff: string[]): string {
+    const lines: string[] = [];
+
+    for (const line of diff) {
+      if (line.startsWith('@@')) {
+        lines.push(this.color(this.theme.header) + line + this.reset());
+      } else if (line.startsWith('---') || line.startsWith('+++')) {
+        lines.push(this.color(this.theme.header) + line + this.reset());
+      } else if (line.startsWith('+')) {
+        lines.push(this.color(this.theme.success) + line + this.reset());
+      } else if (line.startsWith('-')) {
+        lines.push(this.color(this.theme.error) + line + this.reset());
+      } else {
+        lines.push(line);
+      }
+    }
+
+    return lines.join('\n');
+  }
+
+  /**
+   * 渲染确认提示
+   *
+   * @param message - 提示消息
+   * @returns 格式化的确认提示
+   */
+  renderConfirmation(message: string): string {
+    return `${this.color(this.theme.warning)}⚠ ${message}${this.reset()}`;
   }
 
   /**

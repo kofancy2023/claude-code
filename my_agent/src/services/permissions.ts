@@ -433,7 +433,10 @@ export class PermissionSystem {
       };
     }
 
-    return { allowed: true };
+    // 检查是否需要用户确认（危险操作）
+    const needsConfirmation = DANGEROUS_TOOLS.includes(context.toolName);
+
+    return { allowed: true, requiresConfirmation: needsConfirmation };
   }
 
   /**
@@ -477,7 +480,23 @@ export interface PermissionCheckResult {
   allowed: boolean;
   /** 如果拒绝，原因是什么 */
   reason?: string;
+  /** 是否需要用户确认（仅当 allowed 为 true 时有效） */
+  requiresConfirmation?: boolean;
 }
+
+/**
+ * 危险操作工具列表
+ * 执行这些工具需要用户确认
+ */
+const DANGEROUS_TOOLS: string[] = [
+  'FileWriteTool',   // 写入文件
+  'EditTool',       // 编辑文件
+  'RmTool',         // 删除文件
+  'BashTool',       // 执行命令
+  'CopyTool',       // 复制文件
+  'MoveTool',       // 移动文件
+  'MkdirTool',      // 创建目录
+];
 
 /**
  * 权限系统状态

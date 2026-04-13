@@ -5,6 +5,7 @@ import { permissions } from '../services/permissions.js';
 import { terminal } from '../ui/terminal.js';
 import { ToolExecutionError, formatError, errorHandler } from '../utils/errors.js';
 import { globalEventEmitter } from '../services/events/index.js';
+import { diffService } from '../services/diff.js';
 
 /**
  * 最多允许的对话轮数（每轮可能包含多个工具调用）
@@ -201,6 +202,37 @@ export class QueryEngine {
         content: `Error: ${errorMsg}`,
         is_error: true,
       });
+    }
+
+    // 步骤 2.5：危险操作需要用户确认
+    if (permResult.requiresConfirmation && callbacks.onConfirm) {
+      let confirmMessage = `Do you want to execute ${toolCall.name}?`;
+      let diff: string[] | undefined;
+
+      // 对于文件编辑类操作，显示 diff
+      if (toolCall.name === 'FileWriteTool' || toolCall.name === 'EditTool') {
+        const filePath = toolCall.input.path as string;
+        const newContent = (toolCall.name === 'FileWriteTool' ? toolCall.input.content : toolCall.input.newString) as string;
+        if (filePath && newContent) {
+          const diffResult = diffService.computeFileDiff(filePath, newContent);
+          if (diffResult.hasChanges) {
+            diff = diffResult.unifiedDiff;
+            confirmMessage = `Do you want to apply this change to ${filePath}? (+${diffResult.addedLines} -${diffResult.removedLines})`;
+          }
+        }
+      }
+
+      const confirmed = await callbacks.onConfirm(confirmMessage, diff);
+      if (!confirmed) {
+        const cancelMsg = 'User cancelled the operation';
+        console.log(terminal.renderWarning(cancelMsg));
+        return JSON.stringify({
+          type: 'tool_result',
+          tool_call_id: toolCall.id,
+          content: cancelMsg,
+          is_error: true,
+        });
+      }
     }
 
     // 步骤 3：标准化参数（AI 可能使用别名）

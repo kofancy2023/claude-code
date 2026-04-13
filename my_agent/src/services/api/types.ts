@@ -8,6 +8,7 @@ import type { ProviderName } from './provider-config.js';
  * - onChunk: 每个文本片段到达时调用
  * - onComplete: 整个响应完成时调用
  * - onError: 发生错误时调用
+ * - onConfirm: 请求用户确认时调用
  */
 export interface StreamCallbacks {
   /** 每个文本片段到达时触发（用于实时显示 AI 响应） */
@@ -16,6 +17,8 @@ export interface StreamCallbacks {
   onComplete?: (fullText: string) => void;
   /** 发生错误时触发（用于错误提示） */
   onError?: (error: Error) => void;
+  /** 请求用户确认（返回 Promise<boolean>） */
+  onConfirm?: (message: string, diff?: string[]) => Promise<boolean>;
 }
 
 /**
