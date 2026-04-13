@@ -11,6 +11,10 @@ export * from './types.js';
 export { createMCPClient } from './client.js';
 export type { MCPClientOptions } from './client.js';
 
+// MCP 集成服务
+export { MCPIntegrationService, mcpIntegration } from './integration.js';
+export type { MCPIntegrationOptions } from './integration.js';
+
 // 资源提供者
 export { createFileSystemProvider } from './providers/FileSystemProvider.js';
 export type { FileSystemProviderConfig } from './providers/FileSystemProvider.js';

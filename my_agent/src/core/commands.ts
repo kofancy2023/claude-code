@@ -361,6 +361,83 @@ export class CommandRegistry {
         console.log(terminal.renderDivider());
       },
     });
+
+    // /mcp 命令 - MCP 服务器管理
+    this.register({
+      name: 'mcp',
+      aliases: [],
+      description: '管理 MCP 服务器连接',
+      usage: '/mcp [connect|disconnect|list|tools] [options]',
+      execute: async (args) => {
+        const { mcpIntegration } = await import('../mcp/integration.js');
+
+        console.log(terminal.renderDivider());
+        console.log(terminal.renderInfo('MCP Server Management'));
+        console.log();
+
+        if (args.length === 0 || args[0] === 'list') {
+          // 列出连接状态
+          console.log(`  Status: ${mcpIntegration.isConnected() ? terminal.renderSuccess('Connected') : terminal.renderError('Disconnected')}`);
+          console.log(`  Servers: ${mcpIntegration.getClientCount()}`);
+          console.log(`  Registered Tools: ${mcpIntegration.getToolCount()}`);
+          console.log();
+
+          // 列出已注册的 MCP 工具
+          const tools = mcpIntegration.getRegisteredTools();
+          if (tools.length > 0) {
+            console.log('  MCP Tools:');
+            for (const tool of tools) {
+              console.log(`    ${terminal.renderHighlight(tool.name)}`);
+              console.log(`      Server: ${tool.serverId}`);
+              console.log(`      Original: ${tool.originalName}`);
+            }
+          }
+
+          console.log();
+          console.log('  Usage:');
+          console.log('    /mcp connect <transport> <url>   - 连接 MCP 服务器');
+          console.log('    /mcp disconnect                   - 断开所有连接');
+          console.log('    /mcp list                         - 显示连接状态');
+          console.log('    /mcp tools                        - 列出 MCP 工具');
+        } else if (args[0] === 'tools') {
+          // 列出 MCP 工具详情
+          const tools = mcpIntegration.getRegisteredTools();
+          console.log(`  Total MCP Tools: ${tools.length}`);
+          console.log();
+
+          for (const tool of tools) {
+            console.log(`  ${terminal.renderHighlight(tool.name)}`);
+            console.log(`    Server: ${tool.serverId}`);
+            console.log(`    Description: ${tool.description}`);
+            console.log();
+          }
+        } else if (args[0] === 'disconnect') {
+          // 断开连接
+          await mcpIntegration.disconnect();
+          console.log(terminal.renderSuccess('Disconnected from all MCP servers'));
+        } else if (args[0] === 'connect' && args.length >= 3) {
+          // 连接新的 MCP 服务器
+          const transport = args[1] as 'http' | 'websocket' | 'stdio';
+          const url = args[2];
+
+          if (!['http', 'websocket', 'stdio'].includes(transport)) {
+            console.log(terminal.renderError(`Invalid transport: ${transport}`));
+            console.log('Valid transports: http, websocket, stdio');
+            return;
+          }
+
+          console.log(terminal.renderInfo(`Connecting to ${transport}://${url}...`));
+
+          // 注意：实际连接需要配置服务器
+          console.log(terminal.renderWarning('Server configuration required. Use MCPIntegrationService directly.'));
+        } else {
+          console.log(terminal.renderError('Unknown subcommand'));
+          console.log('Usage: /mcp [connect|disconnect|list|tools]');
+        }
+
+        console.log(terminal.renderDivider());
+      },
+    });
   }
 }
 
