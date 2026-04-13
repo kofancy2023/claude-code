@@ -12,6 +12,7 @@
 | 04 | [04_step3_api_and_tools.md](04_step3_api_and_tools.md) | Step 3：API 层实现、工具调用机制 |
 | 05 | [05_step4_permissions_ui_errors.md](05_step4_permissions_ui_errors.md) | Step 4：权限系统、终端UI、错误处理 |
 | 06 | [06_next_phase_plan.md](06_next_phase_plan.md) | 下一阶段计划：测试、安全、MCP、Webhook |
+| 07 | [07_plugin_system.md](07_plugin_system.md) | 插件系统：架构、接口、示例、集成 |
 
 ## 教程目录
 
@@ -23,7 +24,8 @@ docs/
 ├── 03_step2_repl_loop.md            # REPL 实现
 ├── 04_step3_api_and_tools.md        # API 与工具
 ├── 05_step4_permissions_ui_errors.md # 权限与错误
-└── 06_next_phase_plan.md            # 开发路线图
+├── 06_next_phase_plan.md            # 开发路线图
+└── 07_plugin_system.md              # 插件系统
 ```
 
 ## 学习路径

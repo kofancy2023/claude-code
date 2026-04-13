@@ -1,0 +1,19 @@
+/**
+ * 插件系统导出
+ *
+ * 提供完整的插件系统功能：
+ * - 类型定义 (types.ts)
+ * - 插件加载器 (loader.ts)
+ * - 插件注册表 (registry.ts)
+ */
+
+// 类型定义
+export * from './types.js';
+
+// 插件加载器
+export { PluginLoader, createPluginLoader } from './loader.js';
+export type { PluginLoaderOptions, LoadResult } from './loader.js';
+
+// 插件注册表
+export { PluginRegistry, createPluginRegistry } from './registry.js';
+export type { PluginRegistryOptions, PluginEvent } from './registry.js';
