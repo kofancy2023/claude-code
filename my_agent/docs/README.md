@@ -13,6 +13,7 @@
 | 05 | [05_step4_permissions_ui_errors.md](05_step4_permissions_ui_errors.md) | Step 4：权限系统、终端UI、错误处理 |
 | 06 | [06_next_phase_plan.md](06_next_phase_plan.md) | 下一阶段计划：测试、安全、MCP、Webhook |
 | 07 | [07_plugin_system.md](07_plugin_system.md) | 插件系统：架构、接口、示例、集成 |
+| 08 | [agent_autonomous_mode.md](agent_autonomous_mode.md) | Agent 自主模式：任务分解、执行计划、自动执行 |
 
 ## 教程目录
 
@@ -25,7 +26,8 @@ docs/
 ├── 04_step3_api_and_tools.md        # API 与工具
 ├── 05_step4_permissions_ui_errors.md # 权限与错误
 ├── 06_next_phase_plan.md            # 开发路线图
-└── 07_plugin_system.md              # 插件系统
+├── 07_plugin_system.md              # 插件系统
+└── agent_autonomous_mode.md        # Agent 自主模式
 ```
 
 ## 学习路径

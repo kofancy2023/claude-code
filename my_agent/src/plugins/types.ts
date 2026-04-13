@@ -8,7 +8,7 @@
  * - 插件元数据 (PluginMetadata)
  */
 
-import type { Tool } from '../tools/index.js';
+import type { Tool } from '../types/index.js';
 
 /**
  * 插件生命周期钩子

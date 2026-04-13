@@ -7,7 +7,7 @@
  * - GitDiffTool: 查看文件差异
  */
 
-import type { AgentPlugin } from '../types.js';
+import type { AgentPlugin } from '../../types.js';
 
 /**
  * Git 状态工具

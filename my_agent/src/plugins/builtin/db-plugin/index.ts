@@ -7,7 +7,7 @@
  * - SchemaTool: 查看表结构
  */
 
-import type { AgentPlugin } from '../types.js';
+import type { AgentPlugin } from '../../types.js';
 
 /**
  * 数据库连接配置

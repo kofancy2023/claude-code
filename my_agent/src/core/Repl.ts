@@ -10,6 +10,7 @@ import { ContextManager } from '../services/context-manager.js';
 import { ToolChainExecutor } from '../services/tool-chain.js';
 import { QueryEngine } from './QueryEngine.js';
 import { commandRegistry } from './commands.js';
+import { createAutoCommand } from './auto-command.js';
 import type { Message } from '../types/index.js';
 
 /**
@@ -76,6 +77,10 @@ export class Repl {
       output: process.stdout,
       prompt: '> ',
     });
+
+    // 注册自主执行命令
+    const autoCmd = createAutoCommand(client);
+    commandRegistry.register(autoCmd);
   }
 
   /**
