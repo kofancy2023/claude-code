@@ -12,4 +12,5 @@ export { GitHubPullRequestTool } from './GitHubPullRequestTool.js';
 export { GitHubCommitTool } from './GitHubCommitTool.js';
 export { GitHubBranchTool } from './GitHubBranchTool.js';
 export { GitHubUserTool } from './GitHubUserTool.js';
+export { GitStatusTool, GitCommitTool, GitPushTool, GitPullTool, GitBranchTool, GitDiffTool } from './GitTools.js';
 export { toolRegistry, ToolRegistry } from './registry.js';

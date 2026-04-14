@@ -19,6 +19,7 @@ import { GitHubPullRequestTool } from './GitHubPullRequestTool.js';
 import { GitHubCommitTool } from './GitHubCommitTool.js';
 import { GitHubBranchTool } from './GitHubBranchTool.js';
 import { GitHubUserTool } from './GitHubUserTool.js';
+import { GitStatusTool, GitCommitTool, GitPushTool, GitPullTool, GitBranchTool, GitDiffTool } from './GitTools.js';
 
 /**
  * 参数别名映射表
@@ -162,6 +163,12 @@ export class ToolRegistry {
     this.register(GitHubCommitTool);
     this.register(GitHubBranchTool);
     this.register(GitHubUserTool);
+    this.register(GitStatusTool);
+    this.register(GitCommitTool);
+    this.register(GitPushTool);
+    this.register(GitPullTool);
+    this.register(GitBranchTool);
+    this.register(GitDiffTool);
   }
 
   /**
