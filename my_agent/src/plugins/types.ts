@@ -199,6 +199,12 @@ export enum PluginStatus {
 
   /** 插件已禁用 */
   Disabled = 'disabled',
+
+  /** 插件激活并运行中 */
+  Active = 'active',
+
+  /** 插件已暂停 */
+  Paused = 'paused',
 }
 
 /**
@@ -232,6 +238,9 @@ export interface PluginInstance {
 
   /** 实例特定数据 */
   data?: Record<string, unknown>;
+
+  /** 原始插件定义（用于重载） */
+  plugin?: AgentPlugin;
 }
 
 /**

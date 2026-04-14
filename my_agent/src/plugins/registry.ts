@@ -117,6 +117,7 @@ export class PluginRegistry {
       middleware: plugin.middleware || [],
       config: new Map(),
       loadedAt: Date.now(),
+      plugin, // 保存原始插件定义用于重载
     };
 
     if (plugin.initialize && this.options.autoInitialize) {

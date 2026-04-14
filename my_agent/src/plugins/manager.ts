@@ -236,6 +236,13 @@ export class PluginManager {
   }
 
   /**
+   * 获取所有已加载的插件实例
+   */
+  getAllPlugins(): ReturnType<PluginRegistry['getAll']> {
+    return this.registry.getAll();
+  }
+
+  /**
    * 重置单例 (用于测试)
    */
   static reset(): void {

@@ -5,6 +5,7 @@
  * - 类型定义 (types.ts)
  * - 插件加载器 (loader.ts)
  * - 插件注册表 (registry.ts)
+ * - 生命周期管理器 (lifecycle.ts)
  */
 
 // 类型定义
@@ -21,3 +22,7 @@ export type { PluginLoaderOptions, LoadResult } from './loader.js';
 // 插件注册表
 export { PluginRegistry, createPluginRegistry } from './registry.js';
 export type { PluginRegistryOptions, PluginEvent } from './registry.js';
+
+// 插件生命周期管理器
+export { PluginLifecycleManager } from './lifecycle.js';
+export type { PluginLifecycleEvent } from './lifecycle.js';

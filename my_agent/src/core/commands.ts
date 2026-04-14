@@ -438,6 +438,105 @@ export class CommandRegistry {
         console.log(terminal.renderDivider());
       },
     });
+
+    // /plugins 命令 - 插件市场管理
+    this.register({
+      name: 'plugins',
+      aliases: ['plugin'],
+      description: '管理插件（搜索、安装、卸载）',
+      usage: '/plugins [search|install|uninstall|list] [options]',
+      execute: async (args) => {
+        const { pluginMarket } = await import('../plugins/market.js');
+        const { getPluginManager } = await import('../plugins/manager.js');
+
+        console.log(terminal.renderDivider());
+        console.log(terminal.renderInfo('Plugin Management'));
+        console.log();
+
+        if (args.length === 0 || args[0] === 'list') {
+          // 列出已安装的插件
+          const installed = await pluginMarket.listInstalled();
+          const manager = getPluginManager();
+          const allPlugins = manager ? manager.getAllPlugins() : [];
+
+          console.log(`  Installed Plugins: ${installed.length}`);
+          console.log(`  Loaded Plugins: ${allPlugins.length}`);
+          console.log();
+
+          if (installed.length > 0) {
+            console.log('  Installed:');
+            for (const p of installed) {
+              console.log(`    ${terminal.renderHighlight(p.name)} v${p.version}`);
+            }
+          }
+
+          if (allPlugins.length > 0) {
+            console.log('  Loaded:');
+            for (const p of allPlugins) {
+              console.log(`    ${terminal.renderHighlight(p.metadata.name)} v${p.metadata.version}`);
+              if (p.metadata.description) {
+                console.log(`      ${p.metadata.description}`);
+              }
+            }
+          }
+
+          console.log();
+          console.log('  Usage:');
+          console.log('    /plugins search <query>   - 搜索市场插件');
+          console.log('    /plugins install <name>   - 安装插件');
+          console.log('    /plugins uninstall <name> - 卸载插件');
+          console.log('    /plugins list             - 列出已安装插件');
+        } else if (args[0] === 'search' && args.length > 1) {
+          // 搜索插件
+          const query = args.slice(1).join(' ');
+          console.log(terminal.renderInfo(`Searching for "${query}"...`));
+          console.log();
+
+          const results = await pluginMarket.search(query);
+
+          if (results.length === 0) {
+            console.log('  No plugins found.');
+          } else {
+            console.log(`  Found ${results.length} plugins:`);
+            for (const p of results) {
+              console.log(`    ${terminal.renderHighlight(p.name)} v${p.version}`);
+              console.log(`      ${p.description}`);
+              console.log(`      Downloads: ${p.downloads}, Rating: ${p.rating}`);
+              console.log();
+            }
+          }
+        } else if (args[0] === 'install' && args.length > 1) {
+          // 安装插件
+          const name = args[1];
+          console.log(terminal.renderInfo(`Installing ${name}...`));
+
+          const result = await pluginMarket.install(name);
+
+          if (result.success) {
+            console.log(terminal.renderSuccess(`✓ Installed to ${result.path}`));
+          } else {
+            console.log(terminal.renderError(`✗ Failed: ${result.error}`));
+          }
+        } else if (args[0] === 'uninstall' && args.length > 1) {
+          // 卸载插件
+          const name = args[1];
+          console.log(terminal.renderInfo(`Uninstalling ${name}...`));
+
+          const result = await pluginMarket.uninstall(name);
+
+          if (result.success) {
+            console.log(terminal.renderSuccess('✓ Uninstalled'));
+          } else {
+            console.log(terminal.renderError(`✗ Failed: ${result.error}`));
+          }
+        } else {
+          console.log(terminal.renderError('Unknown subcommand'));
+          console.log('Usage: /plugins [search|install|uninstall|list]');
+        }
+
+        console.log(terminal.renderDivider());
+      },
+    });
   }
 }
 
