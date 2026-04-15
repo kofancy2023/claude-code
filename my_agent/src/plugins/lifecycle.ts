@@ -10,7 +10,7 @@
  * 插件生命周期：Loading → Loaded → Active ⇄ Paused → Unloaded
  */
 
-import type { AgentPlugin, PluginInstance } from './types.js';
+import type { AgentPlugin } from './types.js';
 import { PluginStatus } from './types.js';
 import { PluginRegistry } from './registry.js';
 
@@ -281,7 +281,7 @@ export class PluginLifecycleManager {
    */
   private getLoadSequence(targetPlugin: string): string[] {
     const graph = new Map<string, DependencyNode>();
-    const allPlugins = this.registry.getAllPlugins();
+    const allPlugins = this.registry.getAll();
 
     // 构建依赖图
     for (const instance of allPlugins) {
@@ -332,7 +332,7 @@ export class PluginLifecycleManager {
    */
   private findDependents(name: string): string[] {
     const dependents: string[] = [];
-    const allPlugins = this.registry.getAllPlugins();
+    const allPlugins = this.registry.getAll();
 
     for (const instance of allPlugins) {
       const deps = (instance.metadata as unknown as { dependencies?: string[] }).dependencies || [];

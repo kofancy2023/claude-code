@@ -60,9 +60,19 @@ export interface ToolInputSchema {
  */
 export interface ToolProperty {
   /** 参数类型 */
-  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
+  type: string;
   /** 参数描述 */
   description: string;
+  /** 数组元素定义 */
+  items?: ToolProperty;
+  /** 枚举值列表 */
+  enum?: string[];
+  /** 默认值 */
+  default?: unknown;
+  /** 对象属性（用于嵌套对象） */
+  properties?: Record<string, ToolProperty>;
+  /** 必填属性 */
+  required?: string[];
 }
 
 /**

@@ -24,6 +24,7 @@ import type {
   MCPMessage,
   ResourceProvider,
 } from './types.js';
+export type { MCPClient } from './types.js';
 import { MCPError, MCPMessageType } from './types.js';
 
 /**

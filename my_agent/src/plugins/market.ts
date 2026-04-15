@@ -15,7 +15,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as https from 'https';
 import * as http from 'http';
-import type { AgentPlugin, PluginMetadata } from './types.js';
+import type { AgentPlugin } from './types.js';
 import { PluginType } from './types.js';
 
 /**
@@ -119,7 +119,7 @@ export class PluginMarket {
   async search(query: string, limit: number = 20): Promise<MarketEntry[]> {
     // 尝试从市场获取
     try {
-      const results = await this.fetchFromRegistry(`/search?q=${encodeURIComponent(query)}&limit=${limit}`);
+      const results = await this.fetchFromRegistry<MarketEntry[]>(`/search?q=${encodeURIComponent(query)}&limit=${limit}`);
       return results;
     } catch (error) {
       console.warn('[PluginMarket] Failed to fetch from registry, using mock data:', error);
@@ -142,7 +142,7 @@ export class PluginMarket {
 
     // 从市场获取
     try {
-      const info = await this.fetchFromRegistry(`/package/${name}`);
+      const info = await this.fetchFromRegistry<MarketEntry | null>(`/package/${name}`);
       return info;
     } catch {
       return null;
@@ -296,7 +296,7 @@ export class PluginMarket {
    */
   async getCategories(): Promise<Record<string, MarketEntry[]>> {
     try {
-      const categories = await this.fetchFromRegistry('/categories');
+      const categories = await this.fetchFromRegistry<Record<string, MarketEntry[]>>('/categories');
       return categories;
     } catch {
       return this.getMockCategories();
@@ -306,7 +306,7 @@ export class PluginMarket {
   /**
    * 从市场获取数据
    */
-  private async fetchFromRegistry(endpoint: string): Promise<unknown> {
+  private async fetchFromRegistry<T>(endpoint: string): Promise<T> {
     return new Promise((resolve, reject) => {
       const url = new URL(endpoint, this.options.registryUrl);
       const protocol = url.protocol === 'https:' ? https : http;
@@ -339,7 +339,7 @@ export class PluginMarket {
   /**
    * 下载插件包
    */
-  private async downloadPackage(url: string, targetDir: string): Promise<boolean> {
+  private async downloadPackage(_url: string, targetDir: string): Promise<boolean> {
     // 创建目标目录
     fs.mkdirSync(targetDir, { recursive: true });
 

@@ -9,7 +9,7 @@ import { SessionManager, type SessionData } from '../services/session.js';
 import { ContextManager } from '../services/context-manager.js';
 import { ToolChainExecutor } from '../services/tool-chain.js';
 import { QueryEngine } from './QueryEngine.js';
-import { commandRegistry } from './commands.js';
+import { commandRegistry, SessionCommands, HelpCommands } from './commands.js';
 import { createAutoCommand } from './auto-command.js';
 import { ReadlineEnhancer, readlineEnhancer } from './readline-enhancer.js';
 import type { Message } from '../types/index.js';
@@ -128,46 +128,41 @@ export class Repl {
 
       // 检查是否为斜杠命令
       if (trimmed.startsWith('/')) {
-        await commandRegistry.execute(trimmed, {
-          client: this.client,
-          store: this.store,
-        });
-        this.rl.prompt();
-        return;
-      }
+        // 解析命令
+        const parts = trimmed.slice(1).split(' ');
+        const command = parts[0];
+        const args = parts.slice(1);
 
-      // 兼容旧命令格式
-      if (trimmed === 'exit' || trimmed === 'quit') {
-        await this.cleanup();
-        console.log(terminal.renderSuccess('Goodbye!'));
-        this.rl.close();
-        return;
-      }
-
-      if (trimmed === 'sessions') {
-        await this.listSessions();
-        this.rl.prompt();
-        return;
-      }
-
-      if (trimmed.startsWith('load ')) {
-        const sessionId = trimmed.slice(5).trim();
-        await this.loadSession(sessionId);
-        this.rl.prompt();
-        return;
-      }
-
-      if (trimmed === 'save') {
-        await this.saveCurrentSession();
-        this.rl.prompt();
-        return;
-      }
-
-      if (trimmed === 'chains') {
-        const chains = this.getToolChainExecutor().listChains();
-        console.log(terminal.renderInfo(`Registered chains: ${chains.length}`));
-        for (const chain of chains) {
-          console.log(`  - ${chain.id}: ${chain.name} (${chain.nodes.length} nodes)`);
+        switch (command) {
+          case 'help':
+            HelpCommands.showHelp();
+            break;
+          case 'session':
+            await this.handleSessionCommand(args);
+            break;
+          case 'clear':
+            console.clear();
+            break;
+          case 'exit':
+          case 'quit':
+            await this.cleanup();
+            console.log(terminal.renderSuccess('Goodbye!'));
+            this.rl.close();
+            return;
+          case 'chains':
+            const chains = this.getToolChainExecutor().listChains();
+            console.log(terminal.renderInfo(`Registered chains: ${chains.length}`));
+            for (const chain of chains) {
+              console.log(`  - ${chain.id}: ${chain.name} (${chain.nodes.length} nodes)`);
+            }
+            break;
+          default:
+            // 尝试使用命令注册表执行
+            await commandRegistry.execute(trimmed, {
+              client: this.client,
+              store: this.store,
+            });
+            break;
         }
         this.rl.prompt();
         return;
@@ -301,6 +296,78 @@ export class Repl {
   private async autoSave(): Promise<void> {
     if (this.messageCount > 0) {
       await this.saveCurrentSession(true);  // 静默保存
+    }
+  }
+
+  /**
+   * 处理会话管理命令
+   */
+  private async handleSessionCommand(args: string[]) {
+    const subcommand = args[0];
+    const subargs = args.slice(1);
+
+    switch (subcommand) {
+      case 'list':
+        await SessionCommands.listSessions();
+        break;
+      case 'create':
+        const name = subargs.length > 0 ? subargs.join(' ') : undefined;
+        const session = await SessionCommands.createSession(name);
+        if (session) {
+          this.currentSessionId = session.id;
+          this.store.getState().messages = [];
+          this.messageCount = 0;
+        }
+        break;
+      case 'load':
+        if (subargs.length === 0) {
+          console.error(terminal.renderError('Session ID is required'));
+          break;
+        }
+        const sessionId = subargs[0];
+        const loadedSession = await SessionCommands.loadSession(sessionId);
+        if (loadedSession) {
+          this.currentSessionId = loadedSession.id;
+          this.store.getState().messages = loadedSession.messages;
+          this.messageCount = loadedSession.messages.length;
+        }
+        break;
+      case 'delete':
+        if (subargs.length === 0) {
+          console.error(terminal.renderError('Session ID is required'));
+          break;
+        }
+        await SessionCommands.deleteSession(subargs[0]);
+        break;
+      case 'rename':
+        if (subargs.length < 2) {
+          console.error(terminal.renderError('Session ID and new name are required'));
+          break;
+        }
+        await SessionCommands.renameSession(subargs[0], subargs.slice(1).join(' '));
+        break;
+      case 'export':
+        if (subargs.length === 0) {
+          console.error(terminal.renderError('Session ID is required'));
+          break;
+        }
+        await SessionCommands.exportSession(subargs[0], subargs.length > 1 ? subargs[1] : undefined);
+        break;
+      case 'import':
+        if (subargs.length === 0) {
+          console.error(terminal.renderError('Input path is required'));
+          break;
+        }
+        const importedSession = await SessionCommands.importSession(subargs[0]);
+        if (importedSession) {
+          this.currentSessionId = importedSession.id;
+          this.store.getState().messages = importedSession.messages;
+          this.messageCount = importedSession.messages.length;
+        }
+        break;
+      default:
+        HelpCommands.showSessionHelp();
+        break;
     }
   }
 

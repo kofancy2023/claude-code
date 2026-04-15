@@ -1,542 +1,95 @@
-import { terminal } from '../ui/terminal.js';
-import { getAllProviders, getProviderInfo } from '../services/api/provider-factory.js';
-import { toolRegistry } from '../tools/registry.js';
-import type { Store } from '../state/store.js';
+import type { Message } from '../types';
+import { sessionManager } from '../services/session';
+import { terminal } from '../ui/terminal';
 import type { AIProvider } from '../services/api/types.js';
+import type { Store } from '../state/store.js';
 
 /**
- * CLI 命令接口
- */
-export interface CLICommand {
-  /** 命令名称（不带斜杠） */
-  name: string;
-  /** 命令别名 */
-  aliases?: string[];
-  /** 命令描述 */
-  description: string;
-  /** 使用示例 */
-  usage?: string;
-  /** 执行命令 */
-  execute: (args: string[], context: CommandContext) => Promise<void>;
-}
-
-/**
- * 命令执行上下文
+ * 命令上下文接口
  */
 export interface CommandContext {
-  /** 当前 AI 提供商客户端 */
   client: AIProvider;
-  /** 状态存储 */
   store: Store;
 }
 
 /**
+ * 命令接口
+ */
+export interface Command {
+  name: string;
+  description: string;
+  usage?: string;
+  execute: (args: string[], context: CommandContext) => Promise<void>;
+}
+
+/**
  * 命令注册表
+ * 管理所有可用的命令
  */
 export class CommandRegistry {
-  private commands: Map<string, CLICommand> = new Map();
-
-  constructor() {
-    this.registerBuiltInCommands();
-  }
+  private commands: Map<string, Command> = new Map();
 
   /**
    * 注册命令
    */
-  register(command: CLICommand): void {
+  register(command: Command): void {
     this.commands.set(command.name, command);
-    if (command.aliases) {
-      for (const alias of command.aliases) {
-        this.commands.set(alias, command);
-      }
-    }
   }
 
   /**
-   * 获取命令
-   */
-  get(name: string): CLICommand | undefined {
-    return this.commands.get(name);
-  }
-
-  /**
-   * 获取所有命令
-   */
-  getAll(): CLICommand[] {
-    return Array.from(this.commands.values()).filter(
-      (cmd, index, arr) => arr.findIndex(c => c.name === cmd.name) === index
-    );
-  }
-
-  /**
-   * 检查是否为命令（以斜杠开头）
+   * 检查是否为命令
    */
   isCommand(input: string): boolean {
     return input.startsWith('/');
   }
 
   /**
-   * 解析命令和参数
+   * 解析命令
    */
   parse(input: string): { command: string; args: string[] } | null {
-    if (!this.isCommand(input)) return null;
+    if (!this.isCommand(input)) {
+      return null;
+    }
 
-    const parts = input.slice(1).trim().split(/\s+/);
-    const command = parts[0].toLowerCase();
+    const parts = input.slice(1).split(' ');
+    const command = parts[0];
     const args = parts.slice(1);
 
     return { command, args };
   }
 
   /**
-   * 执行命令
+   * 获取所有命令
    */
-  async execute(input: string, context: CommandContext): Promise<boolean> {
-    const parsed = this.parse(input);
-    if (!parsed) return false;
-
-    const command = this.get(parsed.command);
-    if (!command) {
-      console.log(terminal.renderError(`Unknown command: /${parsed.command}`));
-      console.log(terminal.renderInfo('Type /help for available commands.'));
-      return true;
-    }
-
-    try {
-      await command.execute(parsed.args, context);
-    } catch (error) {
-      console.error(terminal.renderError(
-        `Command error: ${error instanceof Error ? error.message : String(error)}`
-      ));
-    }
-
-    return true;
+  getAll(): Command[] {
+    return Array.from(this.commands.values());
   }
 
   /**
-   * 注册内置命令
+   * 获取命令名称列表
    */
-  private registerBuiltInCommands(): void {
-    // /help 命令
-    this.register({
-      name: 'help',
-      aliases: ['h', '?'],
-      description: '显示所有可用命令',
-      usage: '/help [command]',
-      execute: async (args) => {
-        if (args.length > 0) {
-          // 显示特定命令的帮助
-          const cmd = this.get(args[0]);
-          if (cmd) {
-            console.log(terminal.renderDivider());
-            console.log(terminal.renderInfo(`Command: /${cmd.name}`));
-            console.log(terminal.renderInfo(`Description: ${cmd.description}`));
-            if (cmd.usage) {
-              console.log(terminal.renderInfo(`Usage: ${cmd.usage}`));
-            }
-            if (cmd.aliases && cmd.aliases.length > 0) {
-              console.log(terminal.renderInfo(`Aliases: ${cmd.aliases.map(a => '/' + a).join(', ')}`));
-            }
-            console.log(terminal.renderDivider());
-          } else {
-            console.log(terminal.renderError(`Unknown command: /${args[0]}`));
-          }
-        } else {
-          // 显示所有命令
-          console.log(terminal.renderDivider());
-          console.log(terminal.renderInfo('Available Commands:'));
-          console.log();
+  getCommands(): string[] {
+    return Array.from(this.commands.keys());
+  }
 
-          const commands = this.getAll();
+  /**
+   * 执行命令
+   */
+  async execute(input: string, context: CommandContext): Promise<void> {
+    const parsed = this.parse(input);
+    if (!parsed) {
+      return;
+    }
 
-          // 帮助命令
-          const helpCmd = commands.find(c => c.name === 'help');
-          if (helpCmd) {
-            console.log(`  ${terminal.renderHighlight('/help')} [command]  ${helpCmd.description}`);
-          }
+    const { command, args } = parsed;
+    const cmd = this.commands.get(command);
 
-          // 基础命令
-          console.log();
-          console.log(terminal.renderInfo('  Basic:'));
-          for (const cmd of commands.filter(c => ['clear', 'model', 'tokens', 'history'].includes(c.name))) {
-            const aliases = cmd.aliases ? ` (${cmd.aliases.map(a => '/' + a).join(', ')})` : '';
-            console.log(`  ${terminal.renderHighlight('/' + cmd.name)}${aliases}  ${cmd.description}`);
-          }
-
-          // 工具命令
-          console.log();
-          console.log(terminal.renderInfo('  Tools:'));
-          for (const cmd of commands.filter(c => ['tools', 'permissions'].includes(c.name))) {
-            const aliases = cmd.aliases ? ` (${cmd.aliases.map(a => '/' + a).join(', ')})` : '';
-            console.log(`  ${terminal.renderHighlight('/' + cmd.name)}${aliases}  ${cmd.description}`);
-          }
-
-          // 会话命令
-          console.log();
-          console.log(terminal.renderInfo('  Session:'));
-          for (const cmd of commands.filter(c => ['save', 'sessions', 'load'].includes(c.name))) {
-            const aliases = cmd.aliases ? ` (${cmd.aliases.map(a => '/' + a).join(', ')})` : '';
-            console.log(`  ${terminal.renderHighlight('/' + cmd.name)}${aliases}  ${cmd.description}`);
-          }
-
-          console.log();
-          console.log(terminal.renderDivider());
-        }
-      },
-    });
-
-    // /clear 命令
-    this.register({
-      name: 'clear',
-      aliases: ['cls'],
-      description: '清除对话历史',
-      usage: '/clear',
-      execute: async (_args, context) => {
-        const messages = context.store.getMessages();
-        if (messages.length === 0) {
-          console.log(terminal.renderInfo('Conversation is already empty.'));
-          return;
-        }
-
-        context.store.getState().messages = [];
-        console.log(terminal.renderSuccess(`Cleared ${messages.length} messages.`));
-      },
-    });
-
-    // /model 命令
-    this.register({
-      name: 'model',
-      aliases: ['m'],
-      description: '查看或切换 AI 模型',
-      usage: '/model [provider] [model]',
-      execute: async (args) => {
-        if (args.length === 0) {
-          // 显示当前模型
-          const providers = getAllProviders();
-          console.log(terminal.renderDivider());
-          console.log(terminal.renderInfo('Supported Providers and Models:'));
-          console.log();
-          for (const provider of providers) {
-            const info = getProviderInfo(provider);
-            console.log(`  ${terminal.renderHighlight(provider.padEnd(15))} ${info.defaultModel}`);
-          }
-          console.log();
-          console.log(terminal.renderInfo('Usage: /model <provider> [model]'));
-          console.log(terminal.renderDivider());
-        } else if (args.length === 1) {
-          // 显示指定提供商的模型
-          const provider = args[0].toLowerCase();
-          try {
-            const info = getProviderInfo(provider as any);
-            console.log(terminal.renderDivider());
-            console.log(terminal.renderInfo(`Provider: ${info.name}`));
-            console.log(terminal.renderInfo(`Base URL: ${info.baseUrl}`));
-            console.log(terminal.renderInfo(`Default Model: ${info.defaultModel}`));
-            console.log(terminal.renderDivider());
-          } catch {
-            console.log(terminal.renderError(`Unknown provider: ${provider}`));
-            console.log(terminal.renderInfo('Use /model without arguments to see all providers.'));
-          }
-        }
-      },
-    });
-
-    // /tokens 命令
-    this.register({
-      name: 'tokens',
-      aliases: ['t'],
-      description: '查看当前对话的 token 使用统计',
-      usage: '/tokens',
-      execute: async (_args, context) => {
-        const messages = context.store.getMessages();
-
-        // 简单估算 token 数量（实际应使用 tokenizer）
-        const estimateTokens = (text: string): number => {
-          return Math.ceil(text.length / 4);
-        };
-
-        let totalTokens = 0;
-        const breakdown: { role: string; tokens: number }[] = [];
-
-        for (const msg of messages) {
-          const content = typeof msg.content === 'string'
-            ? msg.content
-            : JSON.stringify(msg.content);
-          const tokens = estimateTokens(content);
-          totalTokens += tokens;
-          breakdown.push({ role: msg.role, tokens });
-        }
-
-        console.log(terminal.renderDivider());
-        console.log(terminal.renderInfo('Token Usage Statistics:'));
-        console.log();
-        console.log(`  ${terminal.renderHighlight('Total Messages:'.padEnd(20))} ${messages.length}`);
-        console.log(`  ${terminal.renderHighlight('Estimated Tokens:'.padEnd(20))} ${totalTokens}`);
-        console.log();
-        console.log(terminal.renderInfo('  Breakdown:'));
-        for (const item of breakdown) {
-          console.log(`    ${item.role.padEnd(12)} ${item.tokens} tokens`);
-        }
-        console.log();
-        console.log(terminal.renderInfo('  Note: Token count is estimated (1 token ≈ 4 characters).'));
-        console.log(terminal.renderDivider());
-      },
-    });
-
-    // /tools 命令
-    this.register({
-      name: 'tools',
-      aliases: ['tool'],
-      description: '列出所有已注册的工具',
-      usage: '/tools [search]',
-      execute: async (args) => {
-        const tools = toolRegistry.getAll();
-        const searchTerm = args.length > 0 ? args[0].toLowerCase() : '';
-
-        const filteredTools = searchTerm
-          ? tools.filter(t =>
-              t.name.toLowerCase().includes(searchTerm) ||
-              t.description.toLowerCase().includes(searchTerm)
-            )
-          : tools;
-
-        console.log(terminal.renderDivider());
-        console.log(terminal.renderInfo(`Registered Tools: ${filteredTools.length}`));
-        if (searchTerm) {
-          console.log(terminal.renderInfo(`(filtered by: "${searchTerm}")`));
-        }
-        console.log();
-
-        for (const tool of filteredTools) {
-          console.log(`  ${terminal.renderHighlight(tool.name)}`);
-          console.log(`    ${tool.description}`);
-          const params = Object.keys(tool.inputSchema.properties || {});
-          if (params.length > 0) {
-            console.log(`    Parameters: ${params.join(', ')}`);
-          }
-          console.log();
-        }
-
-        console.log(terminal.renderDivider());
-      },
-    });
-
-    // /history 命令
-    this.register({
-      name: 'history',
-      aliases: ['hist'],
-      description: '显示对话历史',
-      usage: '/history [count]',
-      execute: async (args, context) => {
-        const messages = context.store.getMessages();
-        const count = args.length > 0 ? parseInt(args[0], 10) : messages.length;
-        const recentMessages = messages.slice(-count);
-
-        console.log(terminal.renderDivider());
-        console.log(terminal.renderInfo(`Recent ${recentMessages.length} of ${messages.length} messages:`));
-        console.log();
-
-        for (let i = 0; i < recentMessages.length; i++) {
-          const msg = recentMessages[i];
-          const content = typeof msg.content === 'string'
-            ? msg.content.slice(0, 100) + (msg.content.length > 100 ? '...' : '')
-            : '[Complex content]';
-          console.log(`  [${i + 1}] ${terminal.renderHighlight(msg.role.padEnd(10))} ${content}`);
-        }
-
-        console.log(terminal.renderDivider());
-      },
-    });
-
-    // /permissions 命令
-    this.register({
-      name: 'permissions',
-      aliases: ['perm'],
-      description: '查看权限设置',
-      usage: '/permissions',
-      execute: async () => {
-        console.log(terminal.renderDivider());
-        console.log(terminal.renderInfo('Permission settings are managed by the PermissionSystem.'));
-        console.log(terminal.renderInfo('Use permission configuration files for customization.'));
-        console.log(terminal.renderDivider());
-      },
-    });
-
-    // /mcp 命令 - MCP 服务器管理
-    this.register({
-      name: 'mcp',
-      aliases: [],
-      description: '管理 MCP 服务器连接',
-      usage: '/mcp [connect|disconnect|list|tools] [options]',
-      execute: async (args) => {
-        const { mcpIntegration } = await import('../mcp/integration.js');
-
-        console.log(terminal.renderDivider());
-        console.log(terminal.renderInfo('MCP Server Management'));
-        console.log();
-
-        if (args.length === 0 || args[0] === 'list') {
-          // 列出连接状态
-          console.log(`  Status: ${mcpIntegration.isConnected() ? terminal.renderSuccess('Connected') : terminal.renderError('Disconnected')}`);
-          console.log(`  Servers: ${mcpIntegration.getClientCount()}`);
-          console.log(`  Registered Tools: ${mcpIntegration.getToolCount()}`);
-          console.log();
-
-          // 列出已注册的 MCP 工具
-          const tools = mcpIntegration.getRegisteredTools();
-          if (tools.length > 0) {
-            console.log('  MCP Tools:');
-            for (const tool of tools) {
-              console.log(`    ${terminal.renderHighlight(tool.name)}`);
-              console.log(`      Server: ${tool.serverId}`);
-              console.log(`      Original: ${tool.originalName}`);
-            }
-          }
-
-          console.log();
-          console.log('  Usage:');
-          console.log('    /mcp connect <transport> <url>   - 连接 MCP 服务器');
-          console.log('    /mcp disconnect                   - 断开所有连接');
-          console.log('    /mcp list                         - 显示连接状态');
-          console.log('    /mcp tools                        - 列出 MCP 工具');
-        } else if (args[0] === 'tools') {
-          // 列出 MCP 工具详情
-          const tools = mcpIntegration.getRegisteredTools();
-          console.log(`  Total MCP Tools: ${tools.length}`);
-          console.log();
-
-          for (const tool of tools) {
-            console.log(`  ${terminal.renderHighlight(tool.name)}`);
-            console.log(`    Server: ${tool.serverId}`);
-            console.log(`    Description: ${tool.description}`);
-            console.log();
-          }
-        } else if (args[0] === 'disconnect') {
-          // 断开连接
-          await mcpIntegration.disconnect();
-          console.log(terminal.renderSuccess('Disconnected from all MCP servers'));
-        } else if (args[0] === 'connect' && args.length >= 3) {
-          // 连接新的 MCP 服务器
-          const transport = args[1] as 'http' | 'websocket' | 'stdio';
-          const url = args[2];
-
-          if (!['http', 'websocket', 'stdio'].includes(transport)) {
-            console.log(terminal.renderError(`Invalid transport: ${transport}`));
-            console.log('Valid transports: http, websocket, stdio');
-            return;
-          }
-
-          console.log(terminal.renderInfo(`Connecting to ${transport}://${url}...`));
-
-          // 注意：实际连接需要配置服务器
-          console.log(terminal.renderWarning('Server configuration required. Use MCPIntegrationService directly.'));
-        } else {
-          console.log(terminal.renderError('Unknown subcommand'));
-          console.log('Usage: /mcp [connect|disconnect|list|tools]');
-        }
-
-        console.log(terminal.renderDivider());
-      },
-    });
-
-    // /plugins 命令 - 插件市场管理
-    this.register({
-      name: 'plugins',
-      aliases: ['plugin'],
-      description: '管理插件（搜索、安装、卸载）',
-      usage: '/plugins [search|install|uninstall|list] [options]',
-      execute: async (args) => {
-        const { pluginMarket } = await import('../plugins/market.js');
-        const { getPluginManager } = await import('../plugins/manager.js');
-
-        console.log(terminal.renderDivider());
-        console.log(terminal.renderInfo('Plugin Management'));
-        console.log();
-
-        if (args.length === 0 || args[0] === 'list') {
-          // 列出已安装的插件
-          const installed = await pluginMarket.listInstalled();
-          const manager = getPluginManager();
-          const allPlugins = manager ? manager.getAllPlugins() : [];
-
-          console.log(`  Installed Plugins: ${installed.length}`);
-          console.log(`  Loaded Plugins: ${allPlugins.length}`);
-          console.log();
-
-          if (installed.length > 0) {
-            console.log('  Installed:');
-            for (const p of installed) {
-              console.log(`    ${terminal.renderHighlight(p.name)} v${p.version}`);
-            }
-          }
-
-          if (allPlugins.length > 0) {
-            console.log('  Loaded:');
-            for (const p of allPlugins) {
-              console.log(`    ${terminal.renderHighlight(p.metadata.name)} v${p.metadata.version}`);
-              if (p.metadata.description) {
-                console.log(`      ${p.metadata.description}`);
-              }
-            }
-          }
-
-          console.log();
-          console.log('  Usage:');
-          console.log('    /plugins search <query>   - 搜索市场插件');
-          console.log('    /plugins install <name>   - 安装插件');
-          console.log('    /plugins uninstall <name> - 卸载插件');
-          console.log('    /plugins list             - 列出已安装插件');
-        } else if (args[0] === 'search' && args.length > 1) {
-          // 搜索插件
-          const query = args.slice(1).join(' ');
-          console.log(terminal.renderInfo(`Searching for "${query}"...`));
-          console.log();
-
-          const results = await pluginMarket.search(query);
-
-          if (results.length === 0) {
-            console.log('  No plugins found.');
-          } else {
-            console.log(`  Found ${results.length} plugins:`);
-            for (const p of results) {
-              console.log(`    ${terminal.renderHighlight(p.name)} v${p.version}`);
-              console.log(`      ${p.description}`);
-              console.log(`      Downloads: ${p.downloads}, Rating: ${p.rating}`);
-              console.log();
-            }
-          }
-        } else if (args[0] === 'install' && args.length > 1) {
-          // 安装插件
-          const name = args[1];
-          console.log(terminal.renderInfo(`Installing ${name}...`));
-
-          const result = await pluginMarket.install(name);
-
-          if (result.success) {
-            console.log(terminal.renderSuccess(`✓ Installed to ${result.path}`));
-          } else {
-            console.log(terminal.renderError(`✗ Failed: ${result.error}`));
-          }
-        } else if (args[0] === 'uninstall' && args.length > 1) {
-          // 卸载插件
-          const name = args[1];
-          console.log(terminal.renderInfo(`Uninstalling ${name}...`));
-
-          const result = await pluginMarket.uninstall(name);
-
-          if (result.success) {
-            console.log(terminal.renderSuccess('✓ Uninstalled'));
-          } else {
-            console.log(terminal.renderError(`✗ Failed: ${result.error}`));
-          }
-        } else {
-          console.log(terminal.renderError('Unknown subcommand'));
-          console.log('Usage: /plugins [search|install|uninstall|list]');
-        }
-
-        console.log(terminal.renderDivider());
-      },
-    });
+    if (cmd) {
+      await cmd.execute(args, context);
+    } else {
+      console.log(terminal.renderError(`Unknown command: ${command}`));
+      console.log(terminal.renderInfo('Use /help for available commands'));
+    }
   }
 }
 
@@ -544,3 +97,202 @@ export class CommandRegistry {
  * 全局命令注册表实例
  */
 export const commandRegistry = new CommandRegistry();
+
+/**
+ * 会话管理命令
+ */
+export class SessionCommands {
+  /**
+   * 列出所有会话
+   */
+  static async listSessions() {
+    try {
+      const sessions = await sessionManager.list();
+      
+      if (sessions.length === 0) {
+        console.log(terminal.renderInfo('No sessions found'));
+        return;
+      }
+
+      console.log(terminal.renderTitle('Saved Sessions:'));
+      console.log('');
+
+      sessions.forEach((session, index) => {
+        console.log(`${terminal.renderInfo(`[${index + 1}]`)} ${terminal.renderBold(session.name)}`);
+        console.log(`  ID: ${session.id}`);
+        console.log(`  Created: ${new Date(session.createdAt).toLocaleString()}`);
+        console.log(`  Updated: ${new Date(session.updatedAt).toLocaleString()}`);
+        console.log(`  Messages: ${session.metadata.messageCount}`);
+        if (session.metadata.provider) {
+          console.log(`  Provider: ${session.metadata.provider}`);
+        }
+        if (session.metadata.model) {
+          console.log(`  Model: ${session.metadata.model}`);
+        }
+        console.log('');
+      });
+    } catch (error) {
+      console.error(terminal.renderError(`Error listing sessions: ${error instanceof Error ? error.message : String(error)}`));
+    }
+  }
+
+  /**
+   * 创建新会话
+   */
+  static async createSession(name?: string, provider?: string, model?: string) {
+    try {
+      const session = sessionManager.createSession({ name, provider, model });
+      await sessionManager.save(session);
+      console.log(terminal.renderSuccess(`Created new session: ${session.name} (ID: ${session.id})`));
+      return session;
+    } catch (error) {
+      console.error(terminal.renderError(`Error creating session: ${error instanceof Error ? error.message : String(error)}`));
+      return null;
+    }
+  }
+
+  /**
+   * 加载会话
+   */
+  static async loadSession(sessionId: string) {
+    try {
+      const session = await sessionManager.load(sessionId);
+      if (!session) {
+        console.error(terminal.renderError(`Session not found: ${sessionId}`));
+        return null;
+      }
+      console.log(terminal.renderSuccess(`Loaded session: ${session.name}`));
+      return session;
+    } catch (error) {
+      console.error(terminal.renderError(`Error loading session: ${error instanceof Error ? error.message : String(error)}`));
+      return null;
+    }
+  }
+
+  /**
+   * 删除会话
+   */
+  static async deleteSession(sessionId: string) {
+    try {
+      const success = await sessionManager.delete(sessionId);
+      if (success) {
+        console.log(terminal.renderSuccess(`Deleted session: ${sessionId}`));
+      } else {
+        console.error(terminal.renderError(`Session not found: ${sessionId}`));
+      }
+      return success;
+    } catch (error) {
+      console.error(terminal.renderError(`Error deleting session: ${error instanceof Error ? error.message : String(error)}`));
+      return false;
+    }
+  }
+
+  /**
+   * 重命名会话
+   */
+  static async renameSession(sessionId: string, newName: string) {
+    try {
+      const session = await sessionManager.load(sessionId);
+      if (!session) {
+        console.error(terminal.renderError(`Session not found: ${sessionId}`));
+        return null;
+      }
+      session.name = newName;
+      await sessionManager.save(session);
+      console.log(terminal.renderSuccess(`Renamed session to: ${newName}`));
+      return session;
+    } catch (error) {
+      console.error(terminal.renderError(`Error renaming session: ${error instanceof Error ? error.message : String(error)}`));
+      return null;
+    }
+  }
+
+  /**
+   * 导出会话
+   */
+  static async exportSession(sessionId: string, outputPath?: string) {
+    try {
+      const jsonContent = await sessionManager.exportSession(sessionId);
+      if (!jsonContent) {
+        console.error(terminal.renderError(`Session not found: ${sessionId}`));
+        return null;
+      }
+
+      if (outputPath) {
+        await Bun.write(outputPath, jsonContent);
+        console.log(terminal.renderSuccess(`Exported session to: ${outputPath}`));
+      } else {
+        console.log(jsonContent);
+      }
+      return jsonContent;
+    } catch (error) {
+      console.error(terminal.renderError(`Error exporting session: ${error instanceof Error ? error.message : String(error)}`));
+      return null;
+    }
+  }
+
+  /**
+   * 导入会话
+   */
+  static async importSession(inputPath: string) {
+    try {
+      const jsonContent = await Bun.read(inputPath, 'utf-8');
+      const session = await sessionManager.importSession(jsonContent);
+      console.log(terminal.renderSuccess(`Imported session: ${session.name} (ID: ${session.id})`));
+      return session;
+    } catch (error) {
+      console.error(terminal.renderError(`Error importing session: ${error instanceof Error ? error.message : String(error)}`));
+      return null;
+    }
+  }
+}
+
+/**
+ * 帮助命令
+ */
+export class HelpCommands {
+  /**
+   * 显示帮助信息
+   */
+  static showHelp() {
+    console.log(terminal.renderTitle('My Agent Help'));
+    console.log('');
+    console.log(terminal.renderBold('Commands:'));
+    console.log('');
+    console.log('  /help                    - Show this help message');
+    console.log('  /session list            - List all saved sessions');
+    console.log('  /session create [name]   - Create a new session');
+    console.log('  /session load <id>       - Load a session by ID');
+    console.log('  /session delete <id>     - Delete a session by ID');
+    console.log('  /session rename <id> <name> - Rename a session');
+    console.log('  /session export <id> [path] - Export a session');
+    console.log('  /session import <path>   - Import a session');
+    console.log('  /clear                   - Clear the terminal');
+    console.log('  /exit                    - Exit My Agent');
+    console.log('');
+    console.log(terminal.renderBold('Examples:'));
+    console.log('');
+    console.log('  /session create "My Project"');
+    console.log('  /session load session-12345');
+    console.log('  /session export session-12345 session.json');
+    console.log('');
+  }
+
+  /**
+   * 显示会话管理帮助
+   */
+  static showSessionHelp() {
+    console.log(terminal.renderTitle('Session Management Help'));
+    console.log('');
+    console.log(terminal.renderBold('Session Commands:'));
+    console.log('');
+    console.log('  /session list            - List all saved sessions');
+    console.log('  /session create [name]   - Create a new session');
+    console.log('  /session load <id>       - Load a session by ID');
+    console.log('  /session delete <id>     - Delete a session by ID');
+    console.log('  /session rename <id> <name> - Rename a session');
+    console.log('  /session export <id> [path] - Export a session');
+    console.log('  /session import <path>   - Import a session');
+    console.log('');
+  }
+}

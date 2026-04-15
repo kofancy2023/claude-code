@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Digital Curator - React Discussion</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .code-block {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-family: 'ui-monospace', 'SFMono-Regular', Menlo, Monaco, Consolas, monospace;
+            font-size: 0.875rem;
+            line-height: 1.5;
+            margin-top: 1rem;
+            margin-bottom: 1rem;
+            overflow-x: auto;
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-primary-fixed": "#160066",
+                      "tertiary": "#884800",
+                      "background": "#f9f9fa",
+                      "surface-container-low": "#f3f3f4",
+                      "primary-container": "#6c5ce7",
+                      "surface-container-high": "#e8e8e9",
+                      "primary": "#5341cd",
+                      "error-container": "#ffdad6",
+                      "inverse-on-surface": "#f0f1f2",
+                      "on-secondary-fixed-variant": "#45455b",
+                      "inverse-primary": "#c6bfff",
+                      "primary-fixed": "#e4dfff",
+                      "surface": "#f9f9fa",
+                      "on-primary-fixed-variant": "#4029ba",
+                      "on-tertiary-fixed-variant": "#6e3900",
+                      "surface-container": "#eeeeef",
+                      "on-secondary": "#ffffff",
+                      "surface-bright": "#f9f9fa",
+                      "outline": "#787586",
+                      "on-secondary-container": "#63627a",
+                      "on-error": "#ffffff",
+                      "surface-tint": "#5847d2",
+                      "tertiary-fixed": "#ffdcc3",
+                      "surface-dim": "#dadadb",
+                      "tertiary-container": "#ac5d00",
+                      "error": "#ba1a1a",
+                      "on-primary-container": "#faf6ff",
+                      "on-background": "#1a1c1d",
+                      "secondary-fixed": "#e2e0fc",
+                      "on-surface": "#1a1c1d",
+                      "inverse-surface": "#2f3132",
+                      "surface-container-highest": "#e2e2e3",
+                      "secondary-container": "#e2e0fc",
+                      "surface-variant": "#e2e2e3",
+                      "on-tertiary": "#ffffff",
+                      "outline-variant": "#c8c4d7",
+                      "on-tertiary-fixed": "#2f1500",
+                      "on-surface-variant": "#474554",
+                      "on-secondary-fixed": "#1a1a2e",
+                      "on-error-container": "#93000a",
+                      "tertiary-fixed-dim": "#ffb77d",
+                      "secondary-fixed-dim": "#c6c4df",
+                      "on-primary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "secondary": "#5d5c74",
+                      "on-tertiary-container": "#fff5f1",
+                      "primary-fixed-dim": "#c6bfff"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Inter"],
+                      "body": ["Inter"],
+                      "label": ["Inter"]
+              }
+            },
+          }
+        }
+    </script>
+</head>
+<body class="bg-surface text-on-surface antialiased overflow-hidden">
+<div class="flex h-screen overflow-hidden">
+<!-- SideNavBar Component -->
+<aside class="h-screen w-72 flex-shrink-0 bg-[#1a1a2e] flex flex-col py-8 px-4 font-['Inter'] antialiased tracking-tight">
+<div class="flex items-center gap-3 px-2 mb-10">
+<div class="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">psychology</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xl font-bold text-white tracking-tighter">The Curator</span>
+<span class="text-[10px] text-slate-500 uppercase tracking-widest">Intelligent Monolith</span>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Navigation Tabs -->
+<a class="group flex items-center px-3 py-2 text-slate-400 hover:text-white transition-all duration-200 hover:bg-white/5 rounded-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="add">add</span>
+<span class="text-sm font-medium">New Chat</span>
+</a>
+<div class="pt-6 pb-2">
+<span class="px-3 text-[10px] font-bold text-slate-500 uppercase tracking-widest">History</span>
+</div>
+<!-- Active Chat Item -->
+<a class="group flex items-center px-3 py-2 bg-[#6c5ce7] text-white rounded-md border-l-4 border-white transition-all duration-200" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="history">history</span>
+<span class="text-sm font-medium truncate">关于React最佳实践的讨论</span>
+</a>
+<a class="group flex items-center px-3 py-2 text-slate-400 hover:text-white transition-all duration-200 hover:bg-white/5 rounded-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="folder_open">folder_open</span>
+<span class="text-sm font-medium">Library</span>
+</a>
+<a class="group flex items-center px-3 py-2 text-slate-400 hover:text-white transition-all duration-200 hover:bg-white/5 rounded-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="psychology">psychology</span>
+<span class="text-sm font-medium">Models</span>
+</a>
+<a class="group flex items-center px-3 py-2 text-slate-400 hover:text-white transition-all duration-200 hover:bg-white/5 rounded-md" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="settings">settings</span>
+<span class="text-sm font-medium">Settings</span>
+</a>
+</nav>
+<!-- CTA Upgrade -->
+<div class="mt-auto px-2">
+<div class="bg-gradient-to-br from-primary to-primary-container p-4 rounded-xl mb-6">
+<p class="text-xs font-bold text-white/80 mb-2">PRO PLAN</p>
+<p class="text-sm text-white font-semibold mb-3">Unlock high-density models</p>
+<button class="w-full bg-white text-primary text-xs font-bold py-2 rounded-md transition-transform active:scale-95">Upgrade to Pro</button>
+</div>
+<div class="space-y-1">
+<a class="flex items-center px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="help_outline">help_outline</span>
+                        Support
+                    </a>
+<a class="flex items-center px-3 py-2 text-slate-400 hover:text-white transition-colors text-sm" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="logout">logout</span>
+                        Sign Out
+                    </a>
+</div>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-full bg-surface-container-low relative">
+<!-- TopNavBar Component -->
+<header class="w-full sticky top-0 z-30 flex justify-between items-center px-8 h-16 bg-white dark:bg-slate-900 border-none shadow-sm">
+<div class="flex items-center gap-4">
+<h1 class="text-lg font-bold text-[#1a1c1d] dark:text-slate-100 font-headline -tracking-[0.02em]">关于React最佳实践的讨论</h1>
+</div>
+<div class="flex items-center gap-6">
+<div class="hidden md:flex gap-4">
+<button class="text-[#474554] text-sm font-medium hover:text-[#5341cd] transition-opacity">Share</button>
+<button class="text-[#474554] text-sm font-medium hover:text-[#5341cd] transition-opacity">Export</button>
+</div>
+<div class="flex items-center gap-3">
+<button class="p-1 text-[#474554] hover:text-[#5341cd]">
+<span class="material-symbols-outlined" data-icon="more_vert">more_vert</span>
+</button>
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/20">
+<img alt="AI Identity Icon" data-alt="close-up abstract representation of artificial intelligence as a glowing iridescent crystalline neural network structure with soft bokeh background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDigVZRFeSwXxF-wKVSrJU5YwHbRcVo1pm7_ui9Biof8-mAhrsI3lKcIvBlmonqHgBkYD4hCb1qpML5nWiAiuFsTIWvVKEoE815ywkrCJzy1JMXH8YY-rREm1WQl8IMk8IlW2rqeJ5Adyij59z1CUrpKQvnsqalHyBgxPPi8wOTSes9FMAglr97oDs75TVchmPYyqUvUvtIMZj7JSLrecHQXqewNw9rUuiruLYSA21SdpnJnNcwOBUW6PrVhyzPZw4wgkgx58lyG0wt"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Chat Area -->
+<section class="flex-1 overflow-y-auto pt-8 pb-32 px-4">
+<div class="max-w-[768px] mx-auto space-y-12">
+<!-- User Message -->
+<div class="flex flex-col items-end">
+<div class="bg-secondary-container text-on-secondary-container px-6 py-4 rounded-xl max-w-[85%] shadow-sm">
+<p class="body-lg leading-relaxed">请帮我解释一下React Hooks的基本概念和使用场景</p>
+</div>
+<span class="text-[10px] text-on-surface-variant font-medium mt-2 px-1 opacity-60">10:42 AM</span>
+</div>
+<!-- AI Response -->
+<div class="flex gap-4 group">
+<div class="flex-shrink-0">
+<div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+</div>
+<div class="flex-1 space-y-4">
+<div class="bg-surface-container-lowest text-on-surface px-6 py-6 rounded-xl shadow-[0_4px_20px_-4px_rgba(83,65,205,0.04)]">
+<h3 class="text-lg font-bold mb-3 tracking-tight">React Hooks 核心概念</h3>
+<p class="text-on-surface-variant body-lg leading-relaxed">
+                                    React Hooks 是 React 16.8 引入的一项重大革新，它允许你在不编写 class 的情况下使用 state 以及其他的 React 特性。Hooks 的出现主要是为了解决组件间逻辑复用困难、复杂组件难以理解等问题。
+                                </p>
+<div class="mt-6">
+<h4 class="font-semibold text-on-surface mb-2">1. useState: 状态管理</h4>
+<p class="text-on-surface-variant body-md">这是最基础的 Hook，用于在函数组件中添加本地状态。</p>
+<div class="code-block">
+<span class="text-primary-container">const</span> [count, setCount] = <span class="text-primary-container">useState</span>(<span class="text-tertiary-fixed-dim">0</span>);
+
+<span class="text-slate-500">// 使用场景：处理表单输入、切换开关状态、计数器等</span></div>
+</div>
+</div>
+<span class="text-[10px] text-on-surface-variant font-medium px-1 opacity-60">Digital Curator • Just now</span>
+</div>
+</div>
+<!-- User Message 2 -->
+<div class="flex flex-col items-end">
+<div class="bg-secondary-container text-on-secondary-container px-6 py-4 rounded-xl max-w-[85%] shadow-sm">
+<p class="body-lg leading-relaxed">能给我一个自定义Hook的例子吗？</p>
+</div>
+<span class="text-[10px] text-on-surface-variant font-medium mt-2 px-1 opacity-60">10:45 AM</span>
+</div>
+<!-- AI Response 2 -->
+<div class="flex gap-4">
+<div class="flex-shrink-0">
+<div class="w-10 h-10 bg-primary/10 rounded-lg flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+</div>
+</div>
+<div class="flex-1 space-y-4">
+<div class="bg-surface-container-lowest text-on-surface px-6 py-6 rounded-xl shadow-[0_4px_20px_-4px_rgba(83,65,205,0.04)]">
+<p class="text-on-surface-variant body-lg leading-relaxed">
+                                    当然。自定义 Hook 是一个函数，其名称以 "use" 开头，它允许你将组件逻辑提取到可重用的函数中。
+                                </p>
+<p class="text-on-surface-variant body-lg mt-4 leading-relaxed">
+                                    这是一个经典的 <span class="font-mono text-primary font-semibold">useLocalStorage</span> 例子，它可以让你像使用 useState 一样同步地管理本地存储：
+                                </p>
+<div class="code-block">
+<span class="text-primary-container">function</span> <span class="text-primary-fixed-dim">useLocalStorage</span>(key, initialValue) {
+  <span class="text-primary-container">const</span> [storedValue, setStoredValue] = <span class="text-primary-container">useState</span>(() =&gt; {
+    <span class="text-primary-container">try</span> {
+      <span class="text-primary-container">const</span> item = <span class="text-primary-fixed-dim">window.localStorage</span>.getItem(key);
+      <span class="text-primary-container">return</span> item ? <span class="text-primary-fixed-dim">JSON.parse</span>(item) : initialValue;
+    } <span class="text-primary-container">catch</span> (error) {
+      <span class="text-primary-container">return</span> initialValue;
+    }
+  });
+
+  <span class="text-primary-container">const</span> setValue = <span class="text-primary-fixed-dim">value</span> =&gt; {
+    <span class="text-primary-container">setStoredValue</span>(value);
+    <span class="text-primary-fixed-dim">window.localStorage</span>.setItem(key, <span class="text-primary-fixed-dim">JSON.stringify</span>(value));
+  };
+
+  <span class="text-primary-container">return</span> [storedValue, setValue];
+}</div>
+<p class="text-on-surface-variant body-lg mt-4 leading-relaxed">
+                                    这个 Hook 封装了 localStorage 的存取逻辑，使得多个组件可以轻松共享同一套存储机制。
+                                </p>
+</div>
+<span class="text-[10px] text-on-surface-variant font-medium px-1 opacity-60">Digital Curator • Just now</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Bottom Input Bar -->
+<div class="absolute bottom-0 left-0 right-0 p-8 bg-gradient-to-t from-surface-container-low via-surface-container-low to-transparent">
+<div class="max-w-[768px] mx-auto relative">
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_10px_40px_-10px_rgba(83,65,205,0.1)] flex items-center p-2 group transition-all focus-within:ring-2 ring-primary/20">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">attach_file</span>
+</button>
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-on-surface-variant/50 px-4 py-3 text-base" placeholder="发送消息..." type="text"/>
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined">mic</span>
+</button>
+<button class="bg-primary text-white p-3 rounded-lg flex items-center justify-center transition-transform active:scale-95 shadow-lg shadow-primary/25">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+<div class="mt-3 flex justify-center gap-4">
+<span class="text-[10px] text-on-surface-variant font-medium tracking-wider uppercase opacity-40">Markdown supported</span>
+<span class="text-[10px] text-on-surface-variant font-medium tracking-wider uppercase opacity-40">Press Shift + Enter for new line</span>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

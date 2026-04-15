@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "surface-container-high": "#e8e8e9",
+                      "surface-tint": "#5847d2",
+                      "tertiary-fixed-dim": "#ffb77d",
+                      "on-surface-variant": "#474554",
+                      "tertiary": "#884800",
+                      "outline-variant": "#c8c4d7",
+                      "primary-container": "#6c5ce7",
+                      "tertiary-fixed": "#ffdcc3",
+                      "surface-bright": "#f9f9fa",
+                      "surface-container": "#eeeeef",
+                      "error": "#ba1a1a",
+                      "on-primary-fixed": "#160066",
+                      "surface-container-lowest": "#ffffff",
+                      "primary-fixed-dim": "#c6bfff",
+                      "outline": "#787586",
+                      "on-secondary-fixed-variant": "#45455b",
+                      "on-primary-fixed-variant": "#4029ba",
+                      "on-secondary-fixed": "#1a1a2e",
+                      "inverse-surface": "#2f3132",
+                      "on-tertiary-fixed": "#2f1500",
+                      "on-surface": "#1a1c1d",
+                      "surface-variant": "#e2e2e3",
+                      "on-primary-container": "#faf6ff",
+                      "secondary-fixed-dim": "#c6c4df",
+                      "primary-fixed": "#e4dfff",
+                      "surface-container-highest": "#e2e2e3",
+                      "on-secondary": "#ffffff",
+                      "tertiary-container": "#ac5d00",
+                      "on-error": "#ffffff",
+                      "inverse-primary": "#c6bfff",
+                      "surface-dim": "#dadadb",
+                      "on-error-container": "#93000a",
+                      "surface-container-low": "#f3f3f4",
+                      "secondary-container": "#e2e0fc",
+                      "on-tertiary-container": "#fff5f1",
+                      "on-tertiary": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "background": "#f9f9fa",
+                      "inverse-on-surface": "#f0f1f2",
+                      "on-tertiary-fixed-variant": "#6e3900",
+                      "on-secondary-container": "#63627a",
+                      "primary": "#5341cd",
+                      "surface": "#f9f9fa",
+                      "error-container": "#ffdad6",
+                      "secondary": "#5d5c74",
+                      "secondary-fixed": "#e2e0fc",
+                      "on-background": "#1a1c1d"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "fontFamily": {
+                      "headline": ["Inter"],
+                      "body": ["Inter"],
+                      "label": ["Inter"]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-[#f7f7f8] flex min-h-screen">
+<!-- SideNavBar Component -->
+<aside class="w-[260px] h-screen sticky left-0 top-0 bg-[#1a1a2e] flex flex-col h-full py-8 px-4 font-['Inter'] tracking-tight text-body-lg leading-relaxed z-50">
+<div class="mb-10 px-2 flex items-center gap-3">
+<div class="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+<div>
+<h1 class="text-xl font-bold tracking-tighter text-white">The Curator</h1>
+<p class="text-[10px] text-slate-400 uppercase tracking-widest opacity-60">Intelligent Monolith</p>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<!-- Active state based on Task: Web Search (网站搜索) -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl bg-[#6c5ce7] text-white border-l-4 border-[#6c5ce7] font-medium transition-all scale-102-on-hover" href="#">
+<span class="material-symbols-outlined" data-icon="search">search</span>
+<span>网站搜索</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 opacity-70 hover:bg-[#6c5ce7]/10 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="add_comment">add_comment</span>
+<span>New Chat</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 opacity-70 hover:bg-[#6c5ce7]/10 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+<span>History</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 opacity-70 hover:bg-[#6c5ce7]/10 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="dashboard_customize">dashboard_customize</span>
+<span>Templates</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 opacity-70 hover:bg-[#6c5ce7]/10 hover:text-white transition-all" href="#">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+<span>Settings</span>
+</a>
+</nav>
+<div class="mt-auto space-y-4 pt-6 border-t border-white/5">
+<button class="w-full py-3 bg-gradient-to-br from-[#5341cd] to-[#6c5ce7] text-white rounded-xl font-semibold text-sm hover:scale-[1.02] transition-transform">
+                Upgrade to Pro
+            </button>
+<div class="space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 rounded-xl text-slate-400 opacity-70 hover:bg-[#6c5ce7]/10 hover:text-white transition-all text-sm" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="account_circle">account_circle</span>
+<span>Account</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-xl text-slate-400 opacity-70 hover:bg-[#6c5ce7]/10 hover:text-white transition-all text-sm" href="#">
+<span class="material-symbols-outlined text-lg" data-icon="help">help</span>
+<span>Help</span>
+</a>
+</div>
+</div>
+</aside>
+<!-- Main Content Canvas -->
+<main class="flex-1 flex flex-col min-h-screen">
+<!-- TopAppBar Component -->
+<header class="w-full sticky top-0 z-40 bg-[#f9f9fa] flex justify-between items-center px-8 py-6 shadow-[0_40px_40px_-15px_rgba(83,65,205,0.04)]">
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-[#5341cd]" data-icon="search">search</span>
+<h2 class="font-['Inter'] font-semibold text-lg text-[#1a1c1d]">网站搜索</h2>
+</div>
+<div class="flex items-center gap-6">
+<div class="flex items-center gap-4">
+<button class="text-[#474554] hover:text-[#6c5ce7] transition-colors scale-98-active">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+</button>
+<button class="text-[#474554] hover:text-[#6c5ce7] transition-colors scale-98-active">
+<span class="material-symbols-outlined" data-icon="auto_awesome">auto_awesome</span>
+</button>
+</div>
+<div class="h-8 w-[1px] bg-outline-variant/20"></div>
+<img alt="User Profile Avatar" class="w-10 h-10 rounded-full border-2 border-white shadow-sm object-cover" data-alt="Close-up portrait of a professional male with a neutral expression against a clean studio background with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBZX85_EBc8ibh0umjqSOnk8JsUiZP0bAjEg8du-oVOvaTCM2pm-noETZLMd0-W9YiTxMzaiU_B4B_VV5DJcoup3L8pmPihYBJvKyh4D5eV-ELUoQlDnpZE4BN1OdrB7WCqdiUkTG7nmg4-v7WRVIGPXpqmlvjYsRjJzZXclNBoKhnYzlfgqVLUKZgNBHYcaXH9JY2Z3yfLw91cfzJSwuiUfB1IYFaXJ8fn0qOxp03bfD2zToxhbUVsAXI9qg8WMFr5uUVGgerOJHtZ"/>
+</div>
+</header>
+<!-- Content Area -->
+<div class="flex-1 overflow-y-auto px-8 py-12 flex justify-center">
+<div class="w-full max-w-[900px] flex flex-col items-center">
+<!-- Hero Search Section -->
+<div class="w-full mb-16 text-center">
+<h3 class="text-4xl font-extrabold tracking-tight text-on-surface mb-8">
+                        你好，想搜索什么？
+                    </h3>
+<div class="relative w-full group">
+<input class="w-full bg-surface-container-lowest h-16 pl-6 pr-16 rounded-xl text-lg shadow-[0_40px_40px_-15px_rgba(83,65,205,0.04)] border-none focus:ring-2 focus:ring-primary/20 transition-all placeholder:text-slate-400" placeholder="搜索任何网站或问题..." type="text"/>
+<button class="absolute right-3 top-2.5 w-11 h-11 bg-primary-container text-white rounded-lg flex items-center justify-center hover:scale-105 transition-transform">
+<span class="material-symbols-outlined" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+</div>
+<!-- Feature Grid -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 w-full mb-20">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_24px_-8px_rgba(83,65,205,0.12)] transition-all flex flex-col gap-4 border border-outline-variant/10">
+<div class="w-10 h-10 rounded-lg bg-[#e2e0fc] flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="travel_explore">travel_explore</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface mb-1">智能搜索</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">AI-driven depth web search</p>
+</div>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_24px_-8px_rgba(83,65,205,0.12)] transition-all flex flex-col gap-4 border border-outline-variant/10">
+<div class="w-10 h-10 rounded-lg bg-[#fff5f1] flex items-center justify-center text-tertiary-container">
+<span class="material-symbols-outlined" data-icon="description">description</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface mb-1">文档分析</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">Upload docs for analysis</p>
+</div>
+</div>
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_24px_-8px_rgba(83,65,205,0.12)] transition-all flex flex-col gap-4 border border-outline-variant/10">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="present_to_all">present_to_all</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface mb-1">PPT生成</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">One-click professional presentations</p>
+</div>
+</div>
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_24px_-8px_rgba(83,65,205,0.12)] transition-all flex flex-col gap-4 border border-outline-variant/10">
+<div class="w-10 h-10 rounded-lg bg-surface-container flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="table_chart">table_chart</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface mb-1">数据表格</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">Intelligent spreadsheet processing</p>
+</div>
+</div>
+<!-- Card 5 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_24px_-8px_rgba(83,65,205,0.12)] transition-all flex flex-col gap-4 border border-outline-variant/10">
+<div class="w-10 h-10 rounded-lg bg-primary/5 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" data-icon="biotech">biotech</span>
+</div>
+<div>
+<h4 class="font-bold text-on-surface mb-1">深度研究</h4>
+<p class="text-sm text-on-surface-variant leading-relaxed">Multi-dimensional research reports</p>
+</div>
+</div>
+<!-- Card 6 -->
+<div class="bg-surface-container-lowest p-6 rounded-xl shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05)] hover:shadow-[0_12px_24px_-8px_rgba(83,65,205,0.12)] transition-all flex flex-col gap-4 border border-outline-variant/10 group relative">
+<div class="w-10 h-10 rounded-lg bg-surface-variant flex items-center justify-center text-on-surface-variant">
+<span class="material-symbols-outlined" data-icon="hub">hub</span>
+</div>
+<div>
+<div class="flex items-center gap-2">
+<h4 class="font-bold text-on-surface mb-1">Agent 集群</h4>
+<span class="px-1.5 py-0.5 rounded text-[8px] bg-primary text-white font-black uppercase">Beta</span>
+</div>
+<p class="text-sm text-on-surface-variant leading-relaxed">Multi-agent collaboration platform</p>
+</div>
+</div>
+</div>
+<!-- Recent Searches Section -->
+<div class="w-full">
+<div class="flex items-center justify-between mb-6">
+<h5 class="text-sm font-bold text-on-surface tracking-tight uppercase opacity-60">Recent Searches</h5>
+<button class="text-xs text-primary font-medium hover:underline">Clear History</button>
+</div>
+<div class="flex flex-wrap gap-3">
+<div class="px-5 py-2.5 rounded-full bg-surface-container-lowest text-sm text-on-surface-variant border border-outline-variant/20 hover:border-primary/40 hover:text-primary transition-all cursor-pointer flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="history">history</span>
+                            2024 AI 趋势报告
+                        </div>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-lowest text-sm text-on-surface-variant border border-outline-variant/20 hover:border-primary/40 hover:text-primary transition-all cursor-pointer flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="history">history</span>
+                            深海探险新技术
+                        </div>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-lowest text-sm text-on-surface-variant border border-outline-variant/20 hover:border-primary/40 hover:text-primary transition-all cursor-pointer flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="history">history</span>
+                            高效学习法
+                        </div>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-lowest text-sm text-on-surface-variant border border-outline-variant/20 hover:border-primary/40 hover:text-primary transition-all cursor-pointer flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="history">history</span>
+                            可持续能源发展
+                        </div>
+<div class="px-5 py-2.5 rounded-full bg-surface-container-lowest text-sm text-on-surface-variant border border-outline-variant/20 hover:border-primary/40 hover:text-primary transition-all cursor-pointer flex items-center gap-2">
+<span class="material-symbols-outlined text-base" data-icon="history">history</span>
+                            低代码平台对比
+                        </div>
+</div>
+</div>
+</div>
+</div>
+<!-- Background Image/Decoration - Subtle Abstract Shape -->
+<div class="fixed bottom-0 right-0 -z-10 opacity-10 pointer-events-none">
+<svg fill="none" height="600" viewbox="0 0 600 600" width="600" xmlns="http://www.w3.org/2000/svg">
+<circle cx="450" cy="450" fill="url(#paint0_linear)" r="300"></circle>
+<defs>
+<lineargradient gradientunits="userSpaceOnUse" id="paint0_linear" x1="150" x2="450" y1="150" y2="450">
+<stop stop-color="#5341cd"></stop>
+<stop offset="1" stop-color="#6c5ce7" stop-opacity="0"></stop>
+</lineargradient>
+</defs>
+</svg>
+</div>
+</main>
+</body></html>

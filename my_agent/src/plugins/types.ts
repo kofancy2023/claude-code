@@ -10,6 +10,9 @@
 
 import type { Tool } from '../types/index.js';
 
+// 重新导出 Tool 以便其他模块使用
+export type { Tool } from '../types/index.js';
+
 /**
  * 插件生命周期钩子
  * 插件可以在这些时机注入自定义逻辑
@@ -179,6 +182,9 @@ export interface PluginMetadata {
 
   /** 最低兼容版本 */
   minAgentVersion?: string;
+
+  /** 扩展属性索引签名 */
+  [key: string]: unknown;
 }
 
 /**

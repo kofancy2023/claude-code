@@ -7,8 +7,9 @@
  * - 自动发现内置插件
  */
 
-import type { AgentPlugin, PluginSource, PluginValidationResult, PluginType } from './types.js';
-import { PluginStatus } from './types.js';
+import * as fs from 'fs';
+import type { AgentPlugin, PluginSource, PluginValidationResult } from './types.js';
+import { PluginType } from './types.js';
 
 /**
  * 插件加载器配置
@@ -225,12 +226,12 @@ export class PluginLoader {
 
     try {
       const builtinPath = new URL(this.options.builtinDir, import.meta.url).pathname;
-      const entries = await Deno.readDir(builtinPath);
+      const entries = await fs.promises.readdir(builtinPath, { withFileTypes: true });
 
       for (const entry of entries) {
-        if (entry.isDirectory) {
+        if (entry.isDirectory()) {
           plugins.push({
-            type: 'builtin',
+            type: PluginType.Builtin,
             path: entry.name,
             priority: 0,
           });
@@ -254,12 +255,12 @@ export class PluginLoader {
 
     try {
       const url = new URL(dir, import.meta.url).pathname;
-      const entries = await Deno.readDir(url);
+      const entries = await fs.promises.readdir(url, { withFileTypes: true });
 
       for (const entry of entries) {
-        if (entry.isFile && (entry.name.endsWith('.ts') || entry.name.endsWith('.js'))) {
+        if (entry.isFile() && (entry.name.endsWith('.ts') || entry.name.endsWith('.js'))) {
           plugins.push(`${dir}/${entry.name}`);
-        } else if (entry.isDirectory) {
+        } else if (entry.isDirectory()) {
           plugins.push(`${dir}/${entry.name}/index.ts`);
         }
       }
@@ -280,12 +281,12 @@ export class PluginLoader {
 
     try {
       const packagesPath = new URL(this.options.thirdPartyDir, import.meta.url).pathname;
-      const entries = await Deno.readDir(packagesPath);
+      const entries = await fs.promises.readdir(packagesPath, { withFileTypes: true });
 
       for (const entry of entries) {
-        if (entry.isDirectory) {
+        if (entry.isDirectory()) {
           plugins.push({
-            type: 'third_party',
+            type: PluginType.ThirdParty,
             path: entry.name,
             priority: 10,
           });

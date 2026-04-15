@@ -73,11 +73,18 @@ export class ArgParser {
   /**
    * 批量注册选项
    */
-  options(options: CliOption[]): this {
-    for (const opt of options) {
+  addOptions(opts: CliOption[]): this {
+    for (const opt of opts) {
       this.options.set(opt.name, opt);
     }
     return this;
+  }
+
+  /**
+   * 获取所有选项
+   */
+  getOptions(): Map<string, CliOption> {
+    return this.options;
   }
 
   /**

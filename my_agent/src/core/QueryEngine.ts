@@ -6,6 +6,8 @@ import { terminal } from '../ui/terminal.js';
 import { ToolExecutionError, formatError, errorHandler } from '../utils/errors.js';
 import { globalEventEmitter } from '../services/events/index.js';
 import { diffService } from '../services/diff.js';
+import { MemoryManager } from '../services/vector-store';
+import { MemoryType } from '../services/vector-store/MemoryManager';
 
 /**
  * 最多允许的对话轮数（每轮可能包含多个工具调用）
@@ -53,9 +55,12 @@ export interface QueryResult {
 export class QueryEngine {
   /** AI 模型客户端实例 */
   private client: AIProvider;
+  /** 记忆管理器实例 */
+  private memoryManager: MemoryManager;
 
   constructor(client: AIProvider) {
     this.client = client;
+    this.memoryManager = new MemoryManager();
   }
 
   /**
@@ -75,6 +80,28 @@ export class QueryEngine {
     let totalToolCalls = 0;
     // 连续空响应的次数（用于检测死循环）
     let consecutiveEmptyResponses = 0;
+
+    // 步骤 0：检索相关记忆
+    const lastMessage = messages[messages.length - 1];
+    if (lastMessage && lastMessage.role === 'user' && lastMessage.content) {
+      callbacks.onChunk?.(`\n${terminal.renderInfo('[Retrieving relevant memories...]')} `);
+      const relevantMemories = await this.memoryManager.retrieveMemory(
+        lastMessage.content,
+        3
+      );
+
+      if (relevantMemories.length > 0) {
+        callbacks.onChunk?.(`\n${terminal.renderInfo(`[Found ${relevantMemories.length} relevant memories]`)} `);
+        // 将相关记忆添加到消息历史中
+        for (const memory of relevantMemories) {
+          messages.push({
+            role: 'system',
+            content: `[Memory]: ${memory.item.content}`,
+            metadata: { memoryId: memory.item.id, memoryType: memory.item.metadata.memoryType }
+          });
+        }
+      }
+    }
 
     // 主循环：最多执行 MAX_TOOL_CALL_ROUNDS 轮
     for (let round = 0; round < MAX_TOOL_CALL_ROUNDS; round++) {
@@ -100,7 +127,16 @@ export class QueryEngine {
             break;
           }
         } else {
-          // 有文本响应，返回结果
+          // 有文本响应，保存到记忆中
+          if (lastMessage && lastMessage.role === 'user' && lastMessage.content && text) {
+            await this.memoryManager.addMemory(
+              `User: ${lastMessage.content}\nAssistant: ${text}`,
+              MemoryType.SHORT_TERM,
+              { conversationId: 'current' },
+              0.8
+            );
+          }
+          // 返回结果
           return {
             response: text,
             messages,
@@ -133,6 +169,15 @@ export class QueryEngine {
         // 检查是否达到总调用次数限制
         if (totalToolCalls >= MAX_TOOL_CALLS_TOTAL) {
           callbacks.onChunk?.(`\n${terminal.renderWarning('[Warning: Max tool calls reached, stopping]')}`);
+          // 保存到记忆中
+          if (lastMessage && lastMessage.role === 'user' && lastMessage.content) {
+            await this.memoryManager.addMemory(
+              `User: ${lastMessage.content}\nAssistant: ${text || 'Maximum tool calls reached'}`,
+              MemoryType.SHORT_TERM,
+              { conversationId: 'current' },
+              0.6
+            );
+          }
           return {
             response: text || 'Maximum tool calls reached',
             messages,
@@ -144,6 +189,15 @@ export class QueryEngine {
 
     // 达到最大轮数限制
     callbacks.onChunk?.(`\n${terminal.renderWarning('[Warning: Max rounds reached, stopping]')}`);
+    // 保存到记忆中
+    if (lastMessage && lastMessage.role === 'user' && lastMessage.content) {
+      await this.memoryManager.addMemory(
+        `User: ${lastMessage.content}\nAssistant: Maximum rounds reached`,
+        MemoryType.SHORT_TERM,
+        { conversationId: 'current' },
+        0.6
+      );
+    }
     return {
       response: 'Maximum rounds reached',
       messages,

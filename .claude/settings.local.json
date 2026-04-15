@@ -18,7 +18,9 @@
       "Bash(npm install:*)",
       "Bash(zread --help)",
       "Bash(zread generate:*)",
-      "Bash(tee my_analysis/output.md)"
+      "Bash(tee my_analysis/output.md)",
+      "Bash(git stash:*)",
+      "Bash(git push:*)"
     ]
   }
 }

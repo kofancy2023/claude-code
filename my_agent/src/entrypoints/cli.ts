@@ -96,7 +96,7 @@ export async function runCLI(args: string[] = process.argv.slice(2)): Promise<vo
     '0.1.0',
     'my-agent [options] [command]'
   );
-  parser.options(CLI_OPTIONS);
+  parser.addOptions(CLI_OPTIONS);
 
   // 解析参数
   let parsed;

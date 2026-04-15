@@ -17,8 +17,6 @@ import type {
   MCPServerConfig,
   MCPTool,
   MCPResource,
-  MCPToolCallRequest,
-  MCPToolCallResult,
 } from './types.js';
 import { MCPError } from './types.js';
 

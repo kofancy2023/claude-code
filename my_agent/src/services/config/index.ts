@@ -14,7 +14,7 @@
 
 import * as fs from 'fs';
 import * as path from 'path';
-import { ZodSchema, z } from 'zod';
+import { z } from 'zod';
 
 /**
  * 应用配置 schema
@@ -420,7 +420,7 @@ export class ConfigManager {
   /**
    * 验证配置
    */
-  validate(config: unknown): ConfigValidationResult {
+  validate(config: Partial<AppConfig>): ConfigValidationResult {
     const errors: string[] = [];
     const warnings: string[] = [];
 
@@ -428,7 +428,7 @@ export class ConfigManager {
       AppConfigSchema.parse(config);
     } catch (error) {
       if (error instanceof z.ZodError) {
-        for (const issue of error.errors) {
+        for (const issue of error.issues) {
           errors.push(`${issue.path.join('.')}: ${issue.message}`);
         }
       } else {
@@ -508,9 +508,9 @@ export class ConfigManager {
         typeof baseValue === 'object' &&
         !Array.isArray(baseValue)
       ) {
-        result[key] = { ...baseValue, ...overrideValue } as AppConfig[typeof key];
+        (result as Record<string, unknown>)[key] = { ...baseValue, ...overrideValue };
       } else if (overrideValue !== undefined) {
-        result[key] = overrideValue as AppConfig[typeof key];
+        (result as Record<string, unknown>)[key] = overrideValue;
       }
     }
 

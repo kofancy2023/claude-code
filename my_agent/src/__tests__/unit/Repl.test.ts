@@ -76,6 +76,12 @@ describe('Repl 组件单元测试', () => {
     });
 
     it('should get all registered commands', () => {
+      // 注册一个测试命令
+      registry.register({
+        name: 'test',
+        description: 'Test command',
+        execute: async () => {}
+      });
       const commands = registry.getAll();
       expect(commands.length).toBeGreaterThan(0);
     });

@@ -20,6 +20,7 @@ import { GitHubCommitTool } from './GitHubCommitTool.js';
 import { GitHubBranchTool } from './GitHubBranchTool.js';
 import { GitHubUserTool } from './GitHubUserTool.js';
 import { GitStatusTool, GitCommitTool, GitPushTool, GitPullTool, GitBranchTool, GitDiffTool } from './GitTools.js';
+import { LSPTool } from './LSPTool.js';
 
 /**
  * 参数别名映射表
@@ -169,6 +170,29 @@ export class ToolRegistry {
     this.register(GitPullTool);
     this.register(GitBranchTool);
     this.register(GitDiffTool);
+    
+    // 注册LSPTool
+    const lspConfig = {
+      languageServers: {
+        typescript: {
+          command: 'typescript-language-server',
+          args: ['--stdio']
+        },
+        javascript: {
+          command: 'typescript-language-server',
+          args: ['--stdio']
+        },
+        python: {
+          command: 'pylsp',
+          args: []
+        },
+        go: {
+          command: 'gopls',
+          args: []
+        }
+      }
+    };
+    this.register(new LSPTool({ lspConfig, rootPath: process.cwd() }));
   }
 
   /**

@@ -341,7 +341,7 @@ export const GitCommitTool: Tool = {
 
     // 检查是否有暂存的内容
     const statusResult = await runGitCommand(['status', '--porcelain'], path);
-    const hasStaged = statusResult.stdout.some(line => line.charAt(1) !== ' ' && line.charAt(1) !== '?');
+    const hasStaged = statusResult.stdout.split('\n').some((line: string) => line.charAt(1) !== ' ' && line.charAt(1) !== '?');
 
     if (!hasStaged) {
       throw new Error('No staged changes to commit. Use GitStatusTool first, then stage files with git add.');

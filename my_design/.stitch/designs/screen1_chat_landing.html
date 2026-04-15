@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>The Curator | AI Intelligence</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-container": "#63627a",
+                    "surface-bright": "#f9f9fa",
+                    "outline": "#787586",
+                    "on-error": "#ffffff",
+                    "on-primary-fixed-variant": "#4029ba",
+                    "surface": "#f9f9fa",
+                    "surface-container": "#eeeeef",
+                    "on-secondary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#6e3900",
+                    "error-container": "#ffdad6",
+                    "primary-fixed": "#e4dfff",
+                    "inverse-on-surface": "#f0f1f2",
+                    "on-secondary-fixed-variant": "#45455b",
+                    "inverse-primary": "#c6bfff",
+                    "tertiary": "#884800",
+                    "on-primary-fixed": "#160066",
+                    "surface-container-high": "#e8e8e9",
+                    "primary": "#5341cd",
+                    "background": "#f9f9fa",
+                    "surface-container-low": "#f3f3f4",
+                    "primary-container": "#6c5ce7",
+                    "secondary-fixed-dim": "#c6c4df",
+                    "secondary": "#5d5c74",
+                    "on-tertiary-container": "#fff5f1",
+                    "surface-container-lowest": "#ffffff",
+                    "primary-fixed-dim": "#c6bfff",
+                    "on-primary": "#ffffff",
+                    "on-surface-variant": "#474554",
+                    "on-secondary-fixed": "#1a1a2e",
+                    "on-tertiary-fixed": "#2f1500",
+                    "on-tertiary": "#ffffff",
+                    "surface-variant": "#e2e2e2",
+                    "outline-variant": "#c8c4d7",
+                    "on-error-container": "#93000a",
+                    "tertiary-fixed-dim": "#ffb77d",
+                    "on-background": "#1a1c1d",
+                    "secondary-fixed": "#e2e0fc",
+                    "on-surface": "#1a1c1d",
+                    "inverse-surface": "#2f3132",
+                    "secondary-container": "#e2e0fc",
+                    "surface-container-highest": "#e2e2e3",
+                    "surface-tint": "#5847d2",
+                    "tertiary-container": "#ac5d00",
+                    "error": "#ba1a1a",
+                    "on-primary-container": "#faf6ff",
+                    "surface-dim": "#dadadb",
+                    "tertiary-fixed": "#ffdcc3"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "fontFamily": {
+                    "headline": ["Inter"],
+                    "body": ["Inter"],
+                    "label": ["Inter"]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .sidebar-active-accent::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            width: 4px;
+            height: 24px;
+            background-color: white;
+            border-radius: 0 4px 4px 0;
+        }
+    </style>
+</head>
+<body class="bg-surface text-on-surface flex min-h-screen overflow-hidden">
+<!-- SideNavBar Component -->
+<aside class="w-[260px] h-full fixed left-0 top-0 bg-[#1a1a2e] flex flex-col py-6 px-4 z-50">
+<!-- Brand Header -->
+<div class="mb-8 px-2">
+<h1 class="text-2xl font-black text-white tracking-tighter">The Curator</h1>
+<p class="text-xs text-gray-400 font-medium tracking-wide uppercase mt-1">AI Intelligence</p>
+</div>
+<!-- CTA Action -->
+<button class="mb-8 w-full flex items-center justify-center gap-2 bg-gradient-to-br from-[#5341cd] to-[#6c5ce7] text-white py-3 px-4 rounded-xl font-semibold shadow-lg hover:scale-[1.02] transition-transform duration-200">
+<span class="material-symbols-outlined text-lg">add</span>
+<span>New Chat</span>
+</button>
+<!-- Main Navigation -->
+<nav class="flex-1 space-y-1 overflow-y-auto custom-scrollbar">
+<div class="mb-6">
+<p class="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">Intelligence</p>
+<!-- Active Tab: Web -->
+<a class="bg-[#6c5ce7] text-white flex items-center px-4 py-3 rounded-md relative sidebar-active-accent group transition-all duration-200 scale-[1.02]" href="#">
+<span class="material-symbols-outlined mr-3" data-icon="globe">globe</span>
+<span class="label-md font-medium">Web</span>
+</a>
+<a class="text-gray-400 hover:text-white hover:bg-white/5 flex items-center px-4 py-3 transition-all duration-200 rounded-md group" href="#">
+<span class="material-symbols-outlined mr-3 text-gray-500 group-hover:text-white" data-icon="description">description</span>
+<span class="label-md font-medium">Document</span>
+</a>
+<a class="text-gray-400 hover:text-white hover:bg-white/5 flex items-center px-4 py-3 transition-all duration-200 rounded-md group" href="#">
+<span class="material-symbols-outlined mr-3 text-gray-500 group-hover:text-white" data-icon="present_to_all">present_to_all</span>
+<span class="label-md font-medium">PPT</span>
+</a>
+<a class="text-gray-400 hover:text-white hover:bg-white/5 flex items-center px-4 py-3 transition-all duration-200 rounded-md group" href="#">
+<span class="material-symbols-outlined mr-3 text-gray-500 group-hover:text-white" data-icon="table_chart">table_chart</span>
+<span class="label-md font-medium">Spreadsheet</span>
+</a>
+<a class="text-gray-400 hover:text-white hover:bg-white/5 flex items-center px-4 py-3 transition-all duration-200 rounded-md group" href="#">
+<span class="material-symbols-outlined mr-3 text-gray-500 group-hover:text-white" data-icon="query_stats">query_stats</span>
+<span class="label-md font-medium">Deep Research</span>
+</a>
+</div>
+<!-- Chat History -->
+<div class="mt-8">
+<p class="px-4 text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-3">History</p>
+<a class="text-gray-400 hover:text-white hover:bg-white/5 flex items-center px-4 py-2 text-sm transition-all duration-200 rounded-md truncate" href="#">
+                    Project Planning
+                </a>
+<a class="text-gray-400 hover:text-white hover:bg-white/5 flex items-center px-4 py-2 text-sm transition-all duration-200 rounded-md truncate" href="#">
+                    Travel Ideas
+                </a>
+<a class="text-gray-400 hover:text-white hover:bg-white/5 flex items-center px-4 py-2 text-sm transition-all duration-200 rounded-md truncate" href="#">
+                    Market Analysis 2024
+                </a>
+</div>
+</nav>
+<!-- Footer Navigation -->
+<div class="pt-6 border-t border-white/10 space-y-1">
+<a class="text-gray-400 hover:text-white hover:bg-white/5 flex items-center px-4 py-3 transition-colors duration-200 rounded-md group" href="#">
+<span class="material-symbols-outlined mr-3 text-gray-500 group-hover:text-white" data-icon="download">download</span>
+<span class="label-md font-medium">Download App</span>
+</a>
+<a class="text-gray-400 hover:text-white hover:bg-white/5 flex items-center px-4 py-3 transition-colors duration-200 rounded-md group" href="#">
+<span class="material-symbols-outlined mr-3 text-gray-500 group-hover:text-white" data-icon="settings">settings</span>
+<span class="label-md font-medium">Settings</span>
+</a>
+<a class="text-gray-400 hover:text-white hover:bg-white/5 flex items-center px-4 py-3 transition-colors duration-200 rounded-md group" href="#">
+<span class="material-symbols-outlined mr-3 text-gray-500 group-hover:text-white" data-icon="account_circle">account_circle</span>
+<span class="label-md font-medium">Account</span>
+</a>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="ml-[260px] flex-1 flex flex-col h-screen bg-surface relative">
+<!-- TopNavBar Component -->
+<header class="w-full h-16 sticky top-0 z-40 bg-surface/80 backdrop-blur-md flex justify-end items-center px-8">
+<div class="flex items-center gap-6">
+<button class="text-on-surface-variant hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="history">history</span>
+</button>
+<button class="text-on-surface-variant hover:text-primary transition-colors relative">
+<span class="material-symbols-outlined" data-icon="notifications">notifications</span>
+<span class="absolute top-0 right-0 w-2 h-2 bg-primary rounded-full"></span>
+</button>
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden">
+<img alt="User Avatar" class="w-full h-full object-cover" data-alt="professional portrait of a creative individual with soft warm lighting and neutral background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAl4B6UONfivUdgxwpoNNOWC69WFSYagCQcGNNbb5H2b6nA5Rhu8VXUIA1Q-zLpWPx56BaZBPFYe_oDESZ-GXymL3PFJtAzeV0DmCEB5JIodMLsGX19wFAuwFmCQSy8mS41XszphfoxbdPPNx7cFVLMhb27u1nnQ4UTrH151mQLaf_ZLYCIO-O6lYZ-B5tVKd4-7U6p4iRUqvsOoqnGluTQ53FgItVh_LAddgQFfLQIVDRAbiYIYoXLfmLdTE807OEqVZl_BPugc3uj"/>
+</div>
+</div>
+</header>
+<!-- Canvas / Chat UI -->
+<div class="flex-1 flex flex-col items-center justify-center px-6 pb-24 overflow-y-auto">
+<!-- Hero / Empty State -->
+<div class="max-w-2xl w-full text-center mb-12">
+<h2 class="display-md text-4xl md:text-5xl font-black tracking-tight text-on-background mb-4">
+                    How can I help you today?
+                </h2>
+<p class="body-lg text-on-surface-variant max-w-lg mx-auto leading-relaxed">
+                    Harness the power of AI to synthesize knowledge, generate creative assets, and solve complex problems.
+                </p>
+</div>
+<!-- Bento Grid of Suggestions -->
+<div class="max-w-[800px] w-full grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 hover:bg-primary/5 transition-all duration-300 group cursor-pointer">
+<span class="material-symbols-outlined text-primary mb-3 block group-hover:scale-110 transition-transform" data-icon="auto_awesome">auto_awesome</span>
+<h3 class="font-bold text-on-surface mb-2">Summarize Text</h3>
+<p class="text-sm text-on-surface-variant leading-snug">Condense long articles into key bullet points instantly.</p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 hover:bg-primary/5 transition-all duration-300 group cursor-pointer">
+<span class="material-symbols-outlined text-primary mb-3 block group-hover:scale-110 transition-transform" data-icon="insights">insights</span>
+<h3 class="font-bold text-on-surface mb-2">Analyze Data</h3>
+<p class="text-sm text-on-surface-variant leading-snug">Upload spreadsheets and uncover hidden trends.</p>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant/10 hover:bg-primary/5 transition-all duration-300 group cursor-pointer">
+<span class="material-symbols-outlined text-primary mb-3 block group-hover:scale-110 transition-transform" data-icon="code">code</span>
+<h3 class="font-bold text-on-surface mb-2">Write Code</h3>
+<p class="text-sm text-on-surface-variant leading-snug">Debug complex logic or generate boilerplates.</p>
+</div>
+</div>
+<!-- The Command Center (Input Bar) -->
+<div class="w-full max-w-[680px] sticky bottom-0 z-30">
+<div class="bg-surface-container-lowest p-4 rounded-xl shadow-[0_40px_60px_-15px_rgba(83,65,205,0.08)] border border-outline-variant/5">
+<div class="flex items-end gap-3">
+<div class="flex-1 min-h-[44px] flex items-center">
+<textarea class="w-full bg-transparent border-none focus:ring-0 text-on-surface placeholder:text-outline resize-none max-h-48 py-2 px-1 text-base" placeholder="Send a message..." rows="1"></textarea>
+</div>
+<div class="flex items-center gap-2 pb-1">
+<button class="p-2 text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined" data-icon="attach_file">attach_file</span>
+</button>
+<button class="bg-gradient-to-br from-primary to-primary-container text-white w-10 h-10 rounded-lg flex items-center justify-center shadow-md hover:scale-105 active:scale-95 transition-all">
+<span class="material-symbols-outlined" data-icon="arrow_upward">arrow_upward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Feature Pill Buttons -->
+<div class="flex flex-wrap justify-center gap-2 mt-4 opacity-80">
+<button class="px-4 py-1.5 rounded-full bg-surface-variant text-on-surface-variant text-xs font-semibold border border-outline-variant/10 hover:bg-surface-container-high transition-colors">
+                        Draft Email
+                    </button>
+<button class="px-4 py-1.5 rounded-full bg-surface-variant text-on-surface-variant text-xs font-semibold border border-outline-variant/10 hover:bg-surface-container-high transition-colors">
+                        Creative Story
+                    </button>
+<button class="px-4 py-1.5 rounded-full bg-surface-variant text-on-surface-variant text-xs font-semibold border border-outline-variant/10 hover:bg-surface-container-high transition-colors">
+                        Fix Bug
+                    </button>
+<button class="px-4 py-1.5 rounded-full bg-surface-variant text-on-surface-variant text-xs font-semibold border border-outline-variant/10 hover:bg-surface-container-high transition-colors">
+                        Brainstorm
+                    </button>
+</div>
+</div>
+<!-- Subtle Decorative Elements -->
+<div class="absolute bottom-12 right-12 pointer-events-none select-none overflow-hidden opacity-10">
+<div class="w-96 h-96 bg-gradient-to-tr from-primary to-transparent rounded-full blur-3xl"></div>
+</div>
+<div class="absolute top-24 left-24 pointer-events-none select-none overflow-hidden opacity-5">
+<div class="w-64 h-64 bg-gradient-to-br from-tertiary to-transparent rounded-full blur-3xl"></div>
+</div>
+</div>
+<!-- System Message Footer -->
+<footer class="absolute bottom-4 left-1/2 -translate-x-1/2 text-[10px] text-on-surface-variant/40 font-medium tracking-wider uppercase">
+            Powered by The Curator Engine • Version 4.0.2
+        </footer>
+</main>
+</body></html>

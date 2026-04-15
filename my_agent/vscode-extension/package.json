@@ -1,0 +1,96 @@
+{
+  "name": "my-agent-vscode",
+  "displayName": "My Agent VS Code Extension",
+  "description": "VS Code extension for My Agent - an AI-powered coding assistant",
+  "version": "0.1.0",
+  "publisher": "my-agent",
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": [
+    "AI",
+    "Chat",
+    "Programming Languages",
+    "Other"
+  ],
+  "activationEvents": [
+    "onCommand:my-agent.start",
+    "onCommand:my-agent.ask",
+    "onView:my-agent-sidebar"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "my-agent.start",
+        "title": "My Agent: Start Agent"
+      },
+      {
+        "command": "my-agent.ask",
+        "title": "My Agent: Ask a Question"
+      },
+      {
+        "command": "my-agent.clear",
+        "title": "My Agent: Clear Chat"
+      }
+    ],
+    "views": {
+      "explorer": [
+        {
+          "id": "my-agent-sidebar",
+          "name": "My Agent",
+          "icon": "resources/icon.png",
+          "contextualTitle": "My Agent"
+        }
+      ]
+    },
+    "keybindings": [
+      {
+        "command": "my-agent.ask",
+        "key": "ctrl+shift+a",
+        "mac": "cmd+shift+a"
+      }
+    ],
+    "configuration": {
+      "title": "My Agent",
+      "properties": {
+        "my-agent.apiKey": {
+          "type": "string",
+          "default": "",
+          "description": "API key for AI provider"
+        },
+        "my-agent.provider": {
+          "type": "string",
+          "default": "glm",
+          "enum": ["glm", "anthropic", "openai", "gemini"],
+          "description": "AI provider"
+        },
+        "my-agent.model": {
+          "type": "string",
+          "default": "",
+          "description": "AI model to use"
+        },
+        "my-agent.baseUrl": {
+          "type": "string",
+          "default": "",
+          "description": "Base URL for AI provider API"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "test": "npm run compile && node ./test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0",
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.3.0"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.52.0",
+    "ws": "^8.14.0"
+  }
+}
